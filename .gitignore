@@ -1,0 +1,6 @@
+# macOS
+.DS_Store
+
+# reference pictures (not ours, keep them out of the repo)
+*.jpg
+*.jpeg

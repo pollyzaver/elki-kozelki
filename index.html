@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ёлки-козёлки! Семейная новогодняя игра</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Nunito:ital,wght@0,400;0,600;0,800;0,900;1,600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --pine:#0f2b20; --pine-deep:#081a13; --cream:#f6ecd9; --gold:#f2c14e;
+    --red:#d1453b; --ink:#4a2f22; --card:rgba(246,236,217,.07); --line:rgba(246,236,217,.16);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family:'Nunito',system-ui,sans-serif;color:var(--cream);
+    background:radial-gradient(ellipse at 50% 45%, #1d4a36 0%, var(--pine) 45%, var(--pine-deep) 100%) fixed;
+    overflow:hidden;min-height:100vh;
+  }
+  button{font-family:inherit}
+  #snow,#confetti{position:fixed;inset:0;pointer-events:none;z-index:1}
+  #confetti{z-index:20}
+  .garland{position:fixed;top:0;left:0;width:100%;height:60px;z-index:2;pointer-events:none}
+  .bulb{animation:twinkle 1.6s ease-in-out infinite}
+  @keyframes twinkle{0%,100%{opacity:1}50%{opacity:.35}}
+  .drift{position:fixed;left:0;bottom:-2px;width:100%;height:80px;z-index:2;pointer-events:none}
+
+  /* ---------- screens ---------- */
+  .screen{position:fixed;inset:0;z-index:3;overflow-y:auto;display:none;flex-direction:column;align-items:center;
+    padding:60px 18px 170px}
+  .screen.active{display:flex;animation:fadeUp .45s ease both}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+  .wrap{width:100%;max-width:920px}
+  .en{display:block;font-style:italic;font-weight:600;opacity:.62;font-size:.62em;letter-spacing:.01em;margin-top:2px}
+  .eyebrow{font-weight:800;letter-spacing:.28em;text-transform:uppercase;font-size:12px;color:var(--gold);opacity:.9}
+  h1{font-family:'Pacifico',cursive;font-weight:400;font-size:clamp(40px,7vw,78px);line-height:1.15;
+    color:var(--cream);text-shadow:0 3px 0 #7a2a22, 0 10px 30px rgba(0,0,0,.35)}
+  h1 span{color:var(--gold)}
+  h2{font-family:'Pacifico',cursive;font-weight:400;font-size:clamp(30px,4.6vw,46px);line-height:1.2;
+    text-shadow:0 2px 0 #7a2a22;text-align:center}
+  h2 .en{font-family:'Nunito';font-size:16px;text-shadow:none;margin-top:4px}
+
+  .topbar{width:100%;max-width:920px;display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px;flex-wrap:wrap}
+  .ghost{background:rgba(255,255,255,.06);border:1.5px solid var(--line);color:var(--cream);border-radius:999px;
+    padding:9px 16px;font-weight:800;font-size:14px;cursor:pointer;transition:.2s}
+  .ghost:hover{background:rgba(255,255,255,.14)}
+  .ghost small{font-weight:600;font-style:italic;opacity:.6;margin-left:4px}
+
+  .btn{font:800 19px 'Nunito',sans-serif;border:0;cursor:pointer;color:#fff;padding:15px 32px;border-radius:999px;
+    background:linear-gradient(180deg,#e2574c,#b8352c);box-shadow:0 6px 0 #7d2019, 0 14px 30px rgba(209,69,59,.4);
+    transition:transform .15s, box-shadow .15s, opacity .2s}
+  .btn small{display:block;font-size:12px;font-weight:600;font-style:italic;opacity:.8;margin-top:1px}
+  .btn:hover{transform:translateY(-2px)}
+  .btn:active{transform:translateY(4px);box-shadow:0 2px 0 #7d2019,0 6px 14px rgba(209,69,59,.4)}
+  .btn.gold{background:linear-gradient(180deg,#f7d06a,#d9a22b);color:#4a2f22;box-shadow:0 6px 0 #8f6514,0 14px 30px rgba(242,193,78,.35)}
+  .btn:disabled{opacity:.45;pointer-events:none}
+  .icon-btn{width:52px;height:52px;border-radius:50%;border:2px solid rgba(246,236,217,.35);background:rgba(255,255,255,.06);
+    color:var(--cream);font-size:22px;cursor:pointer;transition:.2s}
+  .icon-btn:hover{background:rgba(255,255,255,.14)}
+
+  /* ---------- home ---------- */
+  #scr-home{justify-content:center;gap:6px;text-align:center;padding-bottom:90px}
+  #goatSlot{width:min(400px,78vw);height:min(50vh,460px);flex:none}
+  .actions{display:flex;gap:12px;align-items:center;margin-top:10px;flex-wrap:wrap;justify-content:center}
+  .hint{font-size:13px;opacity:.6;margin-top:8px}
+
+  /* ---------- goat host ---------- */
+  #host{position:fixed;z-index:6;left:0;top:0;width:300px;height:400px;display:flex;justify-content:center;
+    transition:left .7s cubic-bezier(.5,0,.2,1), top .7s cubic-bezier(.5,0,.2,1), width .7s cubic-bezier(.5,0,.2,1), height .7s cubic-bezier(.5,0,.2,1);
+    pointer-events:none}
+  #host.no-anim{transition:none}
+  .glow{position:absolute;left:50%;top:52%;width:120%;aspect-ratio:1;transform:translate(-50%,-50%);
+    background:radial-gradient(circle, rgba(255,214,140,.32) 0%, rgba(255,214,140,.08) 40%, transparent 65%);pointer-events:none}
+  #goat{height:100%;width:auto;overflow:visible;cursor:pointer;position:relative;pointer-events:auto;
+    filter:drop-shadow(0 18px 24px rgba(0,0,0,.35));-webkit-tap-highlight-color:transparent}
+  #goat.hop{animation:hop .55s cubic-bezier(.3,1.6,.5,1)}
+  @keyframes hop{0%{transform:translateY(0)}35%{transform:translateY(-22px) scale(1.02,.98)}70%{transform:translateY(0) scale(1.03,.96)}100%{transform:none}}
+  #goat.sad{animation:sad 1s ease}
+  @keyframes sad{0%,100%{transform:none}30%{transform:rotate(-5deg)}60%{transform:rotate(4deg)}}
+  #head{transform-box:view-box;transform-origin:200px 285px;transition:transform .25s ease-out}
+  #tree{transform-box:view-box;transform-origin:200px 150px;animation:sway 3.2s ease-in-out infinite}
+  @keyframes sway{0%,100%{transform:rotate(-3deg)}50%{transform:rotate(3deg)}}
+  .eye{transform-box:fill-box;transform-origin:center}
+  .eye.blink{animation:blink .16s ease-in-out}
+  @keyframes blink{50%{transform:scaleY(.08)}}
+  .sparkle{transform-box:fill-box;transform-origin:center;animation:spark 2.4s ease-in-out infinite}
+  @keyframes spark{0%,100%{transform:scale(.6);opacity:.4}50%{transform:scale(1.1);opacity:1}}
+  .blush{transition:opacity .3s}
+  #goat.excited .blush{opacity:1}
+  #goat.excited .sparkle{animation-duration:.9s}
+  .bubble{position:absolute;top:2%;left:70%;width:max-content;max-width:230px;padding:11px 15px;border-radius:18px;
+    background:var(--cream);color:var(--ink);font-weight:800;font-size:15px;line-height:1.3;
+    box-shadow:0 10px 30px rgba(0,0,0,.3);opacity:0;transform:translateY(8px) scale(.9);
+    transition:.3s cubic-bezier(.3,1.4,.5,1);pointer-events:none;z-index:4}
+  .bubble i{display:block;font-weight:600;font-size:12.5px;opacity:.65;margin-top:3px}
+  .bubble::after{content:"";position:absolute;left:18px;bottom:-9px;border:10px solid transparent;border-top-color:var(--cream);border-bottom:0}
+  .bubble.show{opacity:1;transform:none}
+  body.corner .glow{opacity:.6}
+  body.corner .sparkle{display:none}
+  body.corner .bubble{top:-8%;left:82%}
+
+  /* ---------- teams ---------- */
+  .stepper{display:flex;align-items:center;justify-content:center;gap:18px;margin:18px 0 6px}
+  .stepper button{width:54px;height:54px;border-radius:50%;border:2px solid var(--line);background:rgba(255,255,255,.07);
+    color:var(--cream);font-size:28px;font-weight:800;cursor:pointer;transition:.2s}
+  .stepper button:hover{background:rgba(255,255,255,.15)}
+  .stepper button:disabled{opacity:.3;pointer-events:none}
+  .count{font-family:'Pacifico';font-size:56px;min-width:70px;text-align:center;color:var(--gold);line-height:1}
+  .label{text-align:center;font-weight:800;font-size:16px}
+  .label .en{font-size:13px}
+  .teams{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;margin:24px 0}
+  .team{position:relative;background:var(--card);border:1.5px solid var(--line);border-radius:22px;padding:16px;
+    display:flex;align-items:center;gap:12px;animation:pop .35s cubic-bezier(.3,1.5,.5,1) both;border-left:6px solid var(--c)}
+  @keyframes pop{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:none}}
+  .avatar{width:58px;height:58px;flex:none;border-radius:50%;background:var(--c);display:grid;place-items:center;font-size:30px;
+    border:0;cursor:pointer;box-shadow:inset 0 -5px 0 rgba(0,0,0,.18);transition:transform .2s}
+  .avatar:hover{transform:rotate(-10deg) scale(1.06)}
+  .team .fields{flex:1;min-width:0}
+  .team .num{font-size:11px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;opacity:.55}
+  .team input{width:100%;background:transparent;border:0;border-bottom:2px dashed var(--line);color:var(--cream);
+    font:800 20px 'Nunito';padding:4px 0;outline:none}
+  .team input:focus{border-bottom-color:var(--c)}
+  .dice{background:none;border:0;font-size:22px;cursor:pointer;opacity:.7;transition:.2s}
+  .dice:hover{opacity:1;transform:rotate(20deg)}
+  .center{display:flex;justify-content:center;gap:12px;flex-wrap:wrap}
+
+  /* ---------- scoreboard ---------- */
+  .scores{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+  .chip{display:flex;align-items:center;gap:8px;padding:6px 14px 6px 6px;border-radius:999px;background:var(--card);
+    border:1.5px solid var(--line);font-weight:800;font-size:15px;transition:.3s}
+  .chip .dot{width:30px;height:30px;border-radius:50%;background:var(--c);display:grid;place-items:center;font-size:17px}
+  .chip b{color:var(--gold);font-size:18px;margin-left:2px}
+  .chip.bump{animation:bump .7s ease}
+  @keyframes bump{30%{transform:scale(1.18);border-color:var(--gold);box-shadow:0 0 24px rgba(242,193,78,.5)}}
+
+  /* ---------- menu ---------- */
+  .rounds{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px;margin:26px 0}
+  .round{position:relative;text-align:left;border-radius:24px;padding:22px;border:1.5px solid var(--line);
+    background:linear-gradient(160deg,rgba(255,255,255,.1),rgba(255,255,255,.03));color:var(--cream);cursor:pointer;transition:.25s;min-height:170px}
+  .round:hover{transform:translateY(-4px);border-color:var(--gold)}
+  .round .emo{font-size:40px}
+  .round h3{font-size:22px;font-weight:900;margin-top:8px}
+  .round p{font-size:14px;opacity:.75;margin-top:6px;line-height:1.4}
+  .round.soon{opacity:.45;cursor:default}
+  .round.soon:hover{transform:none;border-color:var(--line)}
+  .tag{position:absolute;top:16px;right:16px;font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;
+    padding:4px 10px;border-radius:999px;background:rgba(242,193,78,.18);color:var(--gold)}
+
+  /* ---------- closest game ---------- */
+  .qcard{width:100%;max-width:920px;background:linear-gradient(170deg,rgba(255,255,255,.1),rgba(255,255,255,.035));
+    border:1.5px solid var(--line);border-radius:30px;padding:clamp(20px,4vw,40px);box-shadow:0 30px 60px rgba(0,0,0,.25);
+    animation:fadeUp .4s ease both}
+  .qmeta{display:flex;justify-content:space-between;align-items:center;font-weight:800;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}
+  .progress{height:6px;border-radius:9px;background:rgba(255,255,255,.1);margin:12px 0 22px;overflow:hidden}
+  .progress i{display:block;height:100%;background:linear-gradient(90deg,var(--gold),#e2574c);border-radius:9px;transition:width .5s}
+  .qemo{font-size:46px;line-height:1}
+  .qru{font-size:clamp(22px,3.4vw,34px);font-weight:900;line-height:1.25;margin-top:10px}
+  .qen{font-size:clamp(16px,2.2vw,21px);font-style:italic;font-weight:600;opacity:.66;line-height:1.35;margin-top:10px}
+  .answers{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px;margin:28px 0 22px}
+  .ans{border-radius:18px;padding:12px 14px;background:rgba(0,0,0,.18);border:2px solid transparent;transition:.2s}
+  .ans:focus-within{border-color:var(--c)}
+  .ans .who{display:flex;align-items:center;gap:8px;font-weight:800;font-size:15px}
+  .ans .who span.d{width:26px;height:26px;border-radius:50%;background:var(--c);display:grid;place-items:center;font-size:15px}
+  .ans input{width:100%;margin-top:8px;background:transparent;border:0;outline:none;color:var(--cream);
+    font:900 32px 'Nunito';-moz-appearance:textfield}
+  .ans input::placeholder{color:rgba(246,236,217,.25)}
+  .ans input::-webkit-outer-spin-button,.ans input::-webkit-inner-spin-button{-webkit-appearance:none}
+  .qactions{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+  .timer{display:flex;align-items:center;gap:10px;cursor:pointer;background:none;border:0;color:var(--cream);font-weight:800}
+  .timer svg{width:54px;height:54px;transform:rotate(-90deg)}
+  .timer .t{font-size:15px}
+  .timer .t small{display:block;font-style:italic;font-weight:600;opacity:.6;font-size:12px}
+  .timer.low circle.p{stroke:#e2574c}
+
+  .reveal-num{font-family:'Pacifico';font-size:clamp(64px,12vw,120px);color:var(--gold);text-align:center;line-height:1.1;
+    text-shadow:0 4px 0 #7a2a22,0 0 40px rgba(242,193,78,.35)}
+  .reveal-unit{text-align:center;font-weight:800;opacity:.75;margin-top:-4px}
+  .fact{margin:20px auto 6px;max-width:720px;text-align:center;font-size:17px;line-height:1.45}
+  .fact .en{font-size:15px;margin-top:6px}
+  .line{position:relative;margin:30px 0 8px;padding:0 4px}
+  .lane{position:relative;height:44px;border-bottom:1px dashed rgba(246,236,217,.12)}
+  .lane .track{position:absolute;left:0;right:0;top:50%;height:2px;background:rgba(246,236,217,.12)}
+  .lane .pin{position:absolute;top:50%;transform:translate(-50%,-50%);display:flex;align-items:center;gap:6px;white-space:nowrap;
+    transition:left 1s cubic-bezier(.3,1.2,.4,1)}
+  .lane .pin .d{width:32px;height:32px;border-radius:50%;background:var(--c);display:grid;place-items:center;font-size:17px;box-shadow:0 4px 10px rgba(0,0,0,.3)}
+  .lane .pin .v{font-weight:900;font-size:14px;background:rgba(0,0,0,.35);padding:2px 8px;border-radius:8px}
+  .lane .pin.flip{flex-direction:row-reverse;transform:translate(calc(-100% + 16px),-50%)}
+  .lane .pin:not(.flip){transform:translate(-16px,-50%)}
+  .lane.win .pin .d{box-shadow:0 0 0 4px var(--gold),0 0 22px rgba(242,193,78,.7)}
+  .truth{position:absolute;top:-18px;bottom:-6px;width:3px;background:var(--gold);transform:translateX(-50%);border-radius:3px;
+    box-shadow:0 0 14px rgba(242,193,78,.8);transition:left 1s}
+  .truth::before{content:"★";position:absolute;top:-20px;left:50%;transform:translateX(-50%);color:var(--gold);font-size:18px}
+  .results{display:grid;gap:8px;margin:20px 0}
+  .res{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:16px;background:rgba(0,0,0,.16);font-weight:800}
+  .res .d{width:32px;height:32px;border-radius:50%;background:var(--c);display:grid;place-items:center;font-size:17px;flex:none}
+  .res .nm{flex:1}
+  .res .diff{opacity:.7;font-weight:600;font-size:14px}
+  .res .pts{color:var(--gold);font-size:18px;min-width:44px;text-align:right}
+  .res.win{background:rgba(242,193,78,.14);box-shadow:inset 0 0 0 1.5px rgba(242,193,78,.5)}
+  .verdict{text-align:center;font-weight:900;font-size:22px;margin-top:6px}
+  .verdict .en{font-size:15px}
+
+  .rules{display:grid;gap:12px;margin:22px 0;font-size:17px;line-height:1.4}
+  .rules li{list-style:none;display:flex;gap:12px;align-items:flex-start;background:rgba(0,0,0,.15);padding:12px 16px;border-radius:16px}
+  .rules li b.n{color:var(--gold);font-family:'Pacifico';font-size:22px;line-height:1}
+  .rules .en{font-size:14px}
+  .seg{display:inline-flex;background:rgba(0,0,0,.2);border-radius:999px;padding:4px;gap:4px}
+  .seg button{border:0;background:none;color:var(--cream);font-weight:800;font-size:16px;padding:8px 16px;border-radius:999px;cursor:pointer}
+  .seg button.on{background:var(--gold);color:var(--ink)}
+
+  /* ---------- final ---------- */
+  .podium{display:flex;align-items:flex-end;justify-content:center;gap:14px;margin:40px 0 20px;min-height:260px}
+  .step{display:flex;flex-direction:column;align-items:center;gap:8px;width:min(180px,28vw)}
+  .step .d{width:70px;height:70px;border-radius:50%;background:var(--c);display:grid;place-items:center;font-size:36px;box-shadow:0 8px 20px rgba(0,0,0,.3)}
+  .step .nm{font-weight:900;text-align:center;font-size:17px}
+  .step .block{width:100%;border-radius:18px 18px 6px 6px;display:grid;place-items:center;font-family:'Pacifico';font-size:34px;color:var(--ink);
+    animation:grow .9s cubic-bezier(.3,1.3,.4,1) both}
+  @keyframes grow{from{transform:scaleY(0);transform-origin:bottom}to{transform:scaleY(1);transform-origin:bottom}}
+  .rest{max-width:520px;margin:0 auto}
+
+  @media (max-width:700px){
+    .screen{padding:58px 12px 150px}
+    .bubble{max-width:200px;font-size:14px}
+    body.corner .bubble{top:auto;bottom:100%;left:4px}
+    .answers{grid-template-columns:1fr 1fr;gap:10px}
+    .ans input{font-size:26px}
+    .qactions{justify-content:center}
+    body.corner .bubble::after{left:30px}
+  }
+  @media (max-height:640px){#scr-home .eyebrow{display:none}#scr-home h1{font-size:36px}#goatSlot{height:44vh}}
+</style>
+</head>
+<body>
+<canvas id="snow"></canvas>
+<svg class="garland" viewBox="0 0 1000 60" preserveAspectRatio="none" id="garland"></svg>
+
+<!-- ================= HOME ================= -->
+<section class="screen active" id="scr-home">
+  <div class="eyebrow">Семейная новогодняя игра · 2027</div>
+  <h1>Ёлки-<span>козёлки!</span></h1>
+  <div id="goatSlot"></div>
+  <div class="actions">
+    <button class="btn" id="start">Начать игру ✨<small>Let's play</small></button>
+    <button class="icon-btn" id="sound" title="Звук / Sound" aria-label="Включить звук">🔇</button>
+  </div>
+  <div class="hint">Погладь козочку — она любит внимание · <i>Pet the goat, she loves attention</i></div>
+</section>
+
+<!-- ================= TEAMS ================= -->
+<section class="screen" id="scr-teams">
+  <div class="topbar"><button class="ghost" data-go="home">← Назад<small>Back</small></button></div>
+  <div class="wrap">
+    <h2>Собираем команды<span class="en">Let's make teams</span></h2>
+    <div class="stepper">
+      <button id="minus" aria-label="Меньше команд">−</button>
+      <div class="count" id="count">2</div>
+      <button id="plus" aria-label="Больше команд">+</button>
+    </div>
+    <div class="label">Сколько команд? <span class="en">How many teams?</span></div>
+    <div class="teams" id="teamList"></div>
+    <div class="center"><button class="btn gold" id="teamsDone">Дальше →<small>Next</small></button></div>
+  </div>
+</section>
+
+<!-- ================= MENU ================= -->
+<section class="screen" id="scr-menu">
+  <div class="topbar">
+    <button class="ghost" data-go="teams">✏️ Команды<small>Teams</small></button>
+    <button class="ghost" id="toFinal">🏆 Итоги<small>Results</small></button>
+  </div>
+  <div class="wrap">
+    <h2>Выбираем раунд<span class="en">Choose a round</span></h2>
+    <div class="scores" id="menuScores" style="margin-top:18px"></div>
+    <div class="rounds">
+      <button class="round" id="openClosest">
+        <span class="tag" id="closestTag">Играем</span>
+        <div class="emo">🎯</div>
+        <h3>Кто ближе?</h3>
+        <p>Ответ — всегда число. Побеждает команда, которая назовёт самое близкое. Есть вопросы про Италию 🇮🇹 и Грецию 🇬🇷!<span class="en" style="font-size:13px">Closest wins: every answer is a number — the nearest guess scores.</span></p>
+      </button>
+      <div class="round soon"><span class="tag">Скоро</span><div class="emo">🎶</div><h3>Угадай мелодию</h3><p>Новогодние песни с первых нот.<span class="en" style="font-size:13px">Name that tune · coming soon</span></p></div>
+      <div class="round soon"><span class="tag">Скоро</span><div class="emo">❓</div><h3>Викторина</h3><p>Вопросы с вариантами ответа.<span class="en" style="font-size:13px">Multiple-choice quiz · coming soon</span></p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CLOSEST ================= -->
+<section class="screen" id="scr-closest">
+  <div class="topbar">
+    <button class="ghost" data-go="menu">← Раунды<small>Rounds</small></button>
+    <div class="scores" id="gameScores"></div>
+  </div>
+  <div id="closestBody" class="wrap" style="display:flex;justify-content:center"></div>
+</section>
+
+<!-- ================= FINAL ================= -->
+<section class="screen" id="scr-final">
+  <div class="topbar"><button class="ghost" data-go="menu">← Раунды<small>Rounds</small></button></div>
+  <div class="wrap">
+    <h2>Итоги вечера<span class="en">Tonight's results</span></h2>
+    <div class="podium" id="podium"></div>
+    <div class="results rest" id="restList"></div>
+    <div class="center" style="margin-top:18px">
+      <button class="btn gold" id="newGame">Новая игра<small>New game</small></button>
+    </div>
+  </div>
+</section>
+
+<!-- ================= GOAT HOST ================= -->
+<div id="host" class="no-anim">
+  <div class="glow"></div>
+  <div class="bubble" id="bubble"></div>
+  <svg id="goat" viewBox="40 0 320 455" aria-label="Козочка-маскот">
+      <defs>
+        <radialGradient id="iris" cx="45%" cy="40%" r="60%">
+          <stop offset="0" stop-color="#9a6337"/><stop offset=".7" stop-color="#5a3420"/><stop offset="1" stop-color="#2e1a10"/>
+        </radialGradient>
+        <filter id="soft" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2.5"/></filter>
+        <clipPath id="clipL"><circle cx="164" cy="212" r="26"/></clipPath>
+        <clipPath id="clipR"><circle cx="236" cy="212" r="26"/></clipPath>
+        <path id="sp" d="M0-10 C1 -3 3 -1 10 0 C3 1 1 3 0 10 C-1 3 -3 1 -10 0 C-3 -1 -1 -3 0-10Z"/>
+      </defs>
+
+      <ellipse cx="200" cy="440" rx="105" ry="10" fill="#000" opacity=".22"/>
+
+      <!-- sparkles -->
+      <g fill="#f8e7b0">
+        <use href="#sp" class="sparkle" transform="translate(92 70) scale(1.1)"/>
+        <use href="#sp" class="sparkle" style="animation-delay:.6s" transform="translate(318 120) scale(.9)"/>
+        <use href="#sp" class="sparkle" style="animation-delay:1.2s" transform="translate(70 250) scale(.7)"/>
+        <use href="#sp" class="sparkle" style="animation-delay:1.8s" transform="translate(330 300) scale(.8)"/>
+      </g>
+
+      <!-- body -->
+      <g id="bodyOutline" fill="#5b3a29"></g>
+      <g id="bodyFill" fill="#fbf3e6"></g>
+      <!-- hind legs -->
+      <g stroke="#5b3a29" stroke-width="3.5">
+        <ellipse cx="135" cy="415" rx="28" ry="18" fill="#fbf3e6"/>
+        <path d="M108 410 q-14 6 -6 22 q10 4 18 -4 z" fill="#7a5038" stroke-linejoin="round"/>
+        <ellipse cx="265" cy="415" rx="28" ry="18" fill="#fbf3e6"/>
+        <path d="M292 410 q14 6 6 22 q-10 4 -18 -4 z" fill="#7a5038" stroke-linejoin="round"/>
+      </g>
+      <!-- chest fluff lines -->
+      <g fill="none" stroke="#e3d3bc" stroke-width="3" stroke-linecap="round">
+        <path d="M180 320 q8 6 16 0"/><path d="M204 332 q8 6 16 0"/><path d="M186 350 q8 6 16 0"/>
+      </g>
+      <!-- front legs -->
+      <g stroke="#5b3a29" stroke-width="3.5" stroke-linejoin="round">
+        <rect x="163" y="380" width="28" height="48" rx="13" fill="#fbf3e6"/>
+        <path d="M163 414 h28 v12 q0 10 -14 10 q-14 0 -14 -10z" fill="#7a5038"/>
+        <rect x="209" y="380" width="28" height="48" rx="13" fill="#fbf3e6"/>
+        <path d="M209 414 h28 v12 q0 10 -14 10 q-14 0 -14 -10z" fill="#7a5038"/>
+        <path d="M177 426 v9 M223 426 v9" stroke-width="2.5"/>
+      </g>
+
+      <g id="head">
+        <!-- horns -->
+        <g id="hornL">
+          <path d="M170 152 C 160 96, 118 78, 96 124" fill="none" stroke="#4a2f22" stroke-width="30" stroke-linecap="round"/>
+          <path d="M170 152 C 160 96, 118 78, 96 124" fill="none" stroke="#9a6a45" stroke-width="23" stroke-linecap="round"/>
+          <path d="M170 152 C 160 96, 118 78, 96 124" fill="none" stroke="#7d5234" stroke-width="23" stroke-dasharray="3 11"/>
+          <path d="M162 120 C 150 98, 128 92, 112 108" fill="none" stroke="#c39669" stroke-width="4" stroke-linecap="round" opacity=".7"/>
+        </g>
+        <use href="#hornL" transform="translate(400 0) scale(-1 1)"/>
+
+        <!-- ears -->
+        <g id="earL" stroke="#5b3a29" stroke-width="3.5">
+          <ellipse cx="108" cy="208" rx="46" ry="21" transform="rotate(-12 108 208)" fill="#fbf3e6"/>
+          <ellipse cx="104" cy="210" rx="32" ry="12" transform="rotate(-12 104 210)" fill="#f0a6a0" stroke="none"/>
+        </g>
+        <use href="#earL" transform="translate(400 0) scale(-1 1)"/>
+
+        <!-- head -->
+        <g id="headOutline" fill="#5b3a29"></g>
+        <g id="headFill" fill="#fbf3e6"></g>
+        <g id="tuftOutline" fill="#5b3a29"></g>
+        <g id="tuftFill" fill="#fbf3e6"></g>
+
+        <!-- ribbon headband -->
+        <ellipse cx="200" cy="212" rx="74" ry="78" fill="none" stroke="#c9372c" stroke-width="4"/>
+
+        <!-- blush & freckles -->
+        <ellipse class="blush" cx="146" cy="250" rx="16" ry="9" fill="#f29a92" opacity=".65" filter="url(#soft)"/>
+        <ellipse class="blush" cx="254" cy="250" rx="16" ry="9" fill="#f29a92" opacity=".65" filter="url(#soft)"/>
+        <g fill="#c98c78">
+          <circle cx="140" cy="248" r="1.6"/><circle cx="147" cy="253" r="1.6"/><circle cx="153" cy="247" r="1.6"/>
+          <circle cx="260" cy="248" r="1.6"/><circle cx="253" cy="253" r="1.6"/><circle cx="247" cy="247" r="1.6"/>
+          <circle cx="190" cy="226" r="1.3"/><circle cx="200" cy="223" r="1.3"/><circle cx="210" cy="226" r="1.3"/>
+        </g>
+
+        <!-- eyebrows -->
+        <g fill="none" stroke="#5b3a29" stroke-width="3.5" stroke-linecap="round">
+          <path d="M150 176 q13 -9 27 -3"/><path d="M250 176 q-13 -9 -27 -3"/>
+        </g>
+
+        <!-- eyes -->
+        <g class="eye" id="eyeL">
+          <circle cx="164" cy="212" r="26" fill="#fff"/>
+          <g clip-path="url(#clipL)">
+            <g class="pupil" data-cx="164" data-cy="212">
+              <circle cx="164" cy="212" r="16" fill="url(#iris)"/>
+              <circle cx="164" cy="212" r="9.5" fill="#1c120c"/>
+              <circle cx="158" cy="205" r="5" fill="#fff"/>
+              <circle cx="170" cy="218" r="2.2" fill="#fff" opacity=".9"/>
+            </g>
+          </g>
+          <circle cx="164" cy="212" r="26" fill="none" stroke="#4a2f22" stroke-width="4"/>
+        </g>
+        <g class="eye" id="eyeR">
+          <circle cx="236" cy="212" r="26" fill="#fff"/>
+          <g clip-path="url(#clipR)">
+            <g class="pupil" data-cx="236" data-cy="212">
+              <circle cx="236" cy="212" r="16" fill="url(#iris)"/>
+              <circle cx="236" cy="212" r="9.5" fill="#1c120c"/>
+              <circle cx="230" cy="205" r="5" fill="#fff"/>
+              <circle cx="242" cy="218" r="2.2" fill="#fff" opacity=".9"/>
+            </g>
+          </g>
+          <circle cx="236" cy="212" r="26" fill="none" stroke="#4a2f22" stroke-width="4"/>
+        </g>
+
+        <!-- nose & mouth -->
+        <path d="M191 236 q9 -5 18 0 q-2 9 -9 11 q-7 -2 -9 -11z" fill="#eb9a8e" stroke="#5b3a29" stroke-width="3" stroke-linejoin="round"/>
+        <path id="mouth" d="M200 247 v6 M185 253 q7.5 9 15 0 q7.5 9 15 0" fill="none" stroke="#5b3a29" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
+
+        <!-- bow -->
+        <g stroke="#9e271e" stroke-width="2.5" stroke-linejoin="round" fill="#d1453b">
+          <path d="M200 291 c-10 -12 -26 -10 -24 0 c2 9 16 6 24 0z"/>
+          <path d="M200 291 c10 -12 26 -10 24 0 c-2 9 -16 6 -24 0z"/>
+          <path d="M198 293 l-10 26 l6 -2 l2 6 z M202 293 l10 26 l-6 -2 l-2 6 z"/>
+          <circle cx="200" cy="291" r="5"/>
+        </g>
+
+        <!-- tree hat -->
+        <g id="tree">
+          <g id="tiers" fill="#3f8f4a" stroke="#1f4d2b" stroke-width="3.5" stroke-linejoin="round"></g>
+          <g id="beads"></g>
+          <g stroke="#4a2f22" stroke-width="1.8">
+            <circle cx="178" cy="130" r="5.5" fill="#f2c14e"/>
+            <circle cx="224" cy="140" r="5.5" fill="#d1453b"/>
+            <circle cx="210" cy="100" r="5" fill="#5aa6d6"/>
+            <circle cx="188" cy="86" r="4.5" fill="#d1453b"/>
+            <circle cx="206" cy="64" r="4" fill="#f2c14e"/>
+          </g>
+          <g fill="#ffe08a">
+            <circle cx="198" cy="118" r="1.8"/><circle cx="216" cy="78" r="1.6"/><circle cx="186" cy="106" r="1.6"/><circle cx="236" cy="128" r="1.6"/>
+          </g>
+          <path class="star" d="M200 12 l6.5 13.5 l14.8 1.9 l-10.8 10.3 l2.7 14.7 l-13.2 -7.2 l-13.2 7.2 l2.7 -14.7 l-10.8 -10.3 l14.8 -1.9z"
+                fill="#f6c443" stroke="#a06a12" stroke-width="2.5" stroke-linejoin="round"/>
+        </g>
+      </g>
+    </svg>
+</div>
+
+<canvas id="confetti"></canvas>
+<svg class="drift" viewBox="0 0 1000 80" preserveAspectRatio="none">
+  <path d="M0 44 C120 18 220 62 340 40 S560 12 680 42 S880 26 1000 38 V80 H0Z" fill="#eef3f6" opacity=".9"/>
+  <path d="M0 60 C150 44 260 72 420 56 S700 46 820 62 S940 54 1000 56 V80 H0Z" fill="#fff"/>
+</svg>
+
+<script>
+const NS = 'http://www.w3.org/2000/svg';
+const $ = s => document.querySelector(s);
+const el = (tag, attrs, parent) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); parent && parent.appendChild(e); return e; };
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+/* =====================================================================
+   GOAT DRAWING
+   ===================================================================== */
+function fluff(outlineG, fillG, cx, cy, rx, ry, n, r) {
+  for (let i = 0; i < n; i++) {
+    const a = (i / n) * Math.PI * 2, x = cx + Math.cos(a) * rx, y = cy + Math.sin(a) * ry;
+    const rr = r * (0.85 + 0.3 * ((i * 37) % 7) / 7);
+    el('circle', { cx: x, cy: y, r: rr + 3.5 }, outlineG);
+    el('circle', { cx: x, cy: y, r: rr }, fillG);
+  }
+  el('ellipse', { cx, cy, rx: rx + 2, ry: ry + 2 }, fillG);
+}
+fluff($('#bodyOutline'), $('#bodyFill'), 200, 345, 76, 66, 20, 16);
+fluff($('#headOutline'), $('#headFill'), 200, 206, 82, 72, 24, 13);
+(() => {
+  const o = $('#tuftOutline'), f = $('#tuftFill'), c = [[178,152,12],[196,146,13],[215,150,12],[186,162,10],[207,162,10]];
+  c.forEach(([x,y,r]) => el('circle', { cx: x, cy: y, r: r + 3 }, o));
+  c.forEach(([x,y,r]) => el('circle', { cx: x, cy: y, r }, f));
+  el('ellipse', { cx: 200, cy: 172, rx: 34, ry: 10, fill: '#fbf3e6' }, f);
+})();
+function tier(cx, topY, baseY, halfW, sc) {
+  const w = (halfW * 2) / sc, r = w / 2;
+  let d = `M${cx} ${topY} L${cx + halfW} ${baseY}`;
+  for (let i = 0; i < sc; i++) d += ` A${r} ${r * 0.8} 0 0 1 ${cx + halfW - w * (i + 1)} ${baseY}`;
+  return d + ' Z';
+}
+(() => {
+  const tiers = $('#tiers');
+  el('path', { d: tier(200, 84, 150, 50, 5) }, tiers);
+  el('path', { d: tier(200, 56, 114, 39, 4) }, tiers);
+  el('path', { d: tier(200, 30, 80, 27, 3) }, tiers);
+  ['M196 92 L160 144', 'M196 64 L168 108', 'M197 38 L180 76'].forEach(d =>
+    el('path', { d, stroke: '#6fb36a', 'stroke-width': 3, 'stroke-linecap': 'round', fill: 'none', opacity: .8 }, tiers));
+  const beads = $('#beads');
+  ['M163 132 Q200 128 236 112', 'M172 100 Q200 96 228 82', 'M182 70 Q200 66 216 56'].forEach(d => {
+    const p = el('path', { d, fill: 'none', stroke: '#9e271e', 'stroke-width': 1.2 }, beads), L = p.getTotalLength();
+    for (let s = 0; s <= L; s += 6.5) { const pt = p.getPointAtLength(s); el('circle', { cx: pt.x, cy: pt.y, r: 2.6, fill: '#e04b40', stroke: '#8f2219', 'stroke-width': .8 }, beads); }
+  });
+})();
+
+/* ---------- eyes follow the pointer ---------- */
+const svg = $('#goat'), head = $('#head'), pupils = [...document.querySelectorAll('.pupil')];
+const MAX = 9.5;
+let target = { x: null, y: null }, cur = pupils.map(() => ({ x: 0, y: 0 })), tilt = 0, lastMove = 0;
+let lookAt = null; // element the goat should look at (overrides idle)
+function onMove(x, y) { target.x = x; target.y = y; lastMove = Date.now(); }
+addEventListener('pointermove', e => onMove(e.clientX, e.clientY));
+addEventListener('touchstart', e => { const t = e.touches[0]; onMove(t.clientX, t.clientY); }, { passive: true });
+addEventListener('touchmove', e => { const t = e.touches[0]; onMove(t.clientX, t.clientY); }, { passive: true });
+document.addEventListener('pointerleave', () => { target.x = null; });
+function toSvg(x, y) { const pt = svg.createSVGPoint(); pt.x = x; pt.y = y; return pt.matrixTransform(svg.getScreenCTM().inverse()); }
+let idle = { x: 0, y: 0 }, idleTimer = 0;
+function frame(t) {
+  let tgt = null;
+  if (target.x !== null && Date.now() - lastMove < 4000) tgt = target;
+  else if (lookAt) { const r = lookAt.getBoundingClientRect(); tgt = { x: r.left + r.width / 2, y: r.top + r.height / 2 }; }
+  if (!tgt && t - idleTimer > 1800) {
+    idleTimer = t;
+    const a = Math.random() * Math.PI * 2, m = Math.random() < .3 ? 0 : MAX * (.5 + Math.random() * .5);
+    idle = { x: Math.cos(a) * m, y: Math.sin(a) * m * .7 };
+  }
+  let tx = 0;
+  const s = tgt && toSvg(tgt.x, tgt.y);
+  pupils.forEach((p, i) => {
+    let dx = idle.x, dy = idle.y;
+    if (s) {
+      const vx = s.x - +p.dataset.cx, vy = s.y - +p.dataset.cy, d = Math.hypot(vx, vy) || 1, m = Math.min(MAX, d / 6);
+      dx = vx / d * m; dy = vy / d * m; tx += vx;
+    }
+    cur[i].x += (dx - cur[i].x) * .18; cur[i].y += (dy - cur[i].y) * .18;
+    p.setAttribute('transform', `translate(${cur[i].x.toFixed(2)} ${cur[i].y.toFixed(2)})`);
+  });
+  const want = s ? Math.max(-5, Math.min(5, (tx / 2) / 60)) : 0;
+  tilt += (want - tilt) * .08;
+  head.style.transform = `rotate(${tilt.toFixed(2)}deg)`;
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+const eyes = document.querySelectorAll('.eye');
+function blinkOnce() { eyes.forEach(e => { e.classList.remove('blink'); void e.getBBox(); e.classList.add('blink'); }); }
+(function blink() { blinkOnce(); if (Math.random() < .2) setTimeout(blinkOnce, 220); setTimeout(blink, 2200 + Math.random() * 3200); })();
+
+/* ---------- goat moves between home slot and corner ---------- */
+const host = $('#host');
+function placeGoat() {
+  const home = $('#scr-home').classList.contains('active');
+  document.body.classList.toggle('corner', !home);
+  if (home) {
+    const r = $('#goatSlot').getBoundingClientRect();
+    Object.assign(host.style, { left: r.left + 'px', top: r.top + 'px', width: r.width + 'px', height: r.height + 'px' });
+  } else {
+    const h = innerWidth < 700 ? 120 : 175, w = h * 0.75;
+    Object.assign(host.style, { left: '6px', top: (innerHeight - h - 8) + 'px', width: w + 'px', height: h + 'px' });
+  }
+}
+addEventListener('resize', () => { host.classList.add('no-anim'); placeGoat(); requestAnimationFrame(() => host.classList.remove('no-anim')); });
+
+/* ---------- speech & reactions ---------- */
+const bubble = $('#bubble');
+let bubbleT;
+function say(ru, en, ms = 3000) {
+  bubble.innerHTML = esc(ru) + (en ? `<i>${esc(en)}</i>` : '');
+  bubble.classList.add('show');
+  clearTimeout(bubbleT); bubbleT = setTimeout(() => bubble.classList.remove('show'), ms);
+}
+function hop() { svg.classList.remove('hop', 'sad'); void svg.getBBox(); svg.classList.add('hop'); }
+function sad() { svg.classList.remove('hop', 'sad'); void svg.getBBox(); svg.classList.add('sad'); }
+const pets = [
+  ['Ме-е-е! С наступающим! 🎄', 'Ba-a-a! Happy New Year!'], ['Щекотно! 😄', 'That tickles!'],
+  ['Я Козочка — хозяйка 2027 года ✨', "I'm the Goat — host of 2027!"], ['Мандаринку бы… 🍊', 'I could use a tangerine…'],
+  ['Кто сегодня самый умный? 🤔', "Who's the smartest tonight?"], ['Ёлки-козёлки, как вас много! 🥳', 'Wow, so many of you!']
+];
+let petI = 0;
+svg.addEventListener('click', () => { hop(); const p = pets[petI++ % pets.length]; say(p[0], p[1]); bell(1318.5, 0, .8); bell(1760, .12, .8); });
+svg.addEventListener('pointerenter', () => svg.classList.add('excited'));
+svg.addEventListener('pointerleave', () => svg.classList.remove('excited'));
+
+/* =====================================================================
+   SOUND
+   ===================================================================== */
+let audio = null, soundOn = false;
+function ctx() { if (!audio) { try { audio = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} } return audio; }
+function bell(freq, when = 0, dur = .9, vol = .18) {
+  const a = ctx(); if (!a || !soundOn) return;
+  const t = a.currentTime + when;
+  [1, 2.01, 3.02].forEach((h, i) => {
+    const o = a.createOscillator(), g = a.createGain();
+    o.type = 'sine'; o.frequency.value = freq * h;
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol / (i + 1), t + .01);
+    g.gain.exponentialRampToValueAtTime(.0001, t + dur / (i * .6 + 1));
+    o.connect(g).connect(a.destination); o.start(t); o.stop(t + dur);
+  });
+}
+// "Jingle Bells" (J. Pierpont, 1857 – public domain)
+function jingle() {
+  const E = 659.3, G = 784, C = 523.3, D = 587.3, q = .22;
+  let t = 0; [[E,1],[E,1],[E,2],[E,1],[E,1],[E,2],[E,1],[G,1],[C,1.5],[D,.5],[E,3]].forEach(([f, l]) => { bell(f, t, .7, .14); t += l * q; });
+}
+function fanfare() { [523.3, 659.3, 784, 1046.5].forEach((f, i) => bell(f, i * .12, 1, .15)); }
+function tick() { bell(1760, 0, .15, .06); }
+$('#sound').addEventListener('click', e => {
+  soundOn = !soundOn; ctx(); audio && audio.resume && audio.resume();
+  e.currentTarget.textContent = soundOn ? '🔔' : '🔇';
+  if (soundOn) jingle();
+});
+
+/* =====================================================================
+   STATE
+   ===================================================================== */
+const COLORS = ['#e2574c', '#f2c14e', '#5ec27a', '#5aa6d6', '#f29ac0', '#a98be0', '#f08a3c', '#4fc1b6'];
+const EMOJI = ['🍊','⛄','🦌','🎁','🍪','🧦','🔔','❄️','🎄','🐐','🥂','🕯️','🧸','🍫','⭐','🎅'];
+const NAMES = ['Мандаринки','Снеговики','Оленята','Подарочки','Пряники','Носочки','Хлопушки','Шишки','Бенгальские огни',
+  'Оливьешки','Сосульки','Снежинки','Колокольчики','Ёлочки','Шампанчики','Дед Морозы','Снегурочки','Варежки','Пельмешки','Гирлянды'];
+let state = load() || { teams: [], closest: null };
+if (!state.teams.length) setTeamCount(2);
+function save() { try { localStorage.setItem('elki-kozelki', JSON.stringify(state)); } catch (e) {} }
+function load() { try { return JSON.parse(localStorage.getItem('elki-kozelki')); } catch (e) { return null; } }
+function freshTeam(i) {
+  const used = new Set(state.teams.map(t => t.name));
+  const name = NAMES.find(n => !used.has(n)) || 'Команда ' + (i + 1);
+  return { name, emoji: EMOJI[i % EMOJI.length], color: COLORS[i % COLORS.length], score: 0 };
+}
+function setTeamCount(n) {
+  while (state.teams.length < n) state.teams.push(freshTeam(state.teams.length));
+  state.teams.length = n; save();
+}
+
+/* =====================================================================
+   NAVIGATION
+   ===================================================================== */
+function go(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const scr = $('#scr-' + name); scr.classList.add('active'); scr.scrollTop = 0;
+  lookAt = null;
+  ({ teams: renderTeams, menu: renderMenu, closest: renderClosest, final: renderFinal }[name] || (() => {}))();
+  placeGoat();
+}
+document.addEventListener('click', e => { const b = e.target.closest('[data-go]'); if (b) go(b.dataset.go); });
+$('#start').addEventListener('click', () => { hop(); say('Ура! Собираем команды!', "Yay! Let's make teams!"); jingle(); go('teams'); });
+
+function renderScores(box, bumpIds = []) {
+  box.innerHTML = state.teams.map((t, i) =>
+    `<div class="chip ${bumpIds.includes(i) ? 'bump' : ''}" style="--c:${t.color}"><span class="dot">${t.emoji}</span>${esc(t.name)} <b>${t.score}</b></div>`).join('');
+}
+
+/* =====================================================================
+   TEAMS
+   ===================================================================== */
+function renderTeams() {
+  $('#count').textContent = state.teams.length;
+  $('#minus').disabled = state.teams.length <= 2;
+  $('#plus').disabled = state.teams.length >= 8;
+  const list = $('#teamList');
+  list.innerHTML = state.teams.map((t, i) => `
+    <div class="team" style="--c:${t.color};animation-delay:${i * .05}s">
+      <button class="avatar" data-i="${i}" title="Сменить значок / Change icon">${t.emoji}</button>
+      <div class="fields">
+        <div class="num">Команда ${i + 1} · Team ${i + 1}</div>
+        <input value="${esc(t.name)}" data-i="${i}" maxlength="24" aria-label="Название команды ${i + 1}">
+      </div>
+      <button class="dice" data-i="${i}" title="Случайное название / Random name">🎲</button>
+    </div>`).join('');
+  setTimeout(() => say('Придумайте смешные названия!', 'Pick funny team names!'), 400);
+}
+$('#minus').onclick = () => { setTeamCount(state.teams.length - 1); renderTeams(); };
+$('#plus').onclick = () => { setTeamCount(state.teams.length + 1); renderTeams(); hop(); };
+$('#teamList').addEventListener('input', e => { if (e.target.matches('input')) { state.teams[e.target.dataset.i].name = e.target.value; save(); } });
+$('#teamList').addEventListener('click', e => {
+  const av = e.target.closest('.avatar'), dc = e.target.closest('.dice');
+  if (av) { const t = state.teams[av.dataset.i]; const k = EMOJI.indexOf(t.emoji); t.emoji = EMOJI[(k + 1) % EMOJI.length]; av.textContent = t.emoji; save(); bell(1567, 0, .3, .08); }
+  if (dc) {
+    const t = state.teams[dc.dataset.i], used = new Set(state.teams.map(x => x.name));
+    const free = NAMES.filter(n => !used.has(n)); t.name = free[Math.floor(Math.random() * free.length)] || t.name;
+    dc.parentElement.querySelector('input').value = t.name; save(); bell(1318, 0, .3, .08);
+  }
+});
+$('#teamsDone').onclick = () => {
+  state.teams.forEach((t, i) => { if (!t.name.trim()) t.name = 'Команда ' + (i + 1); });
+  save(); hop(); bell(1046, 0, .6); go('menu');
+};
+
+/* =====================================================================
+   MENU
+   ===================================================================== */
+function renderMenu() {
+  renderScores($('#menuScores'));
+  const c = state.closest;
+  $('#closestTag').textContent = !c ? 'Играем · Play' : c.done ? 'Сыграно ✓' : `Вопрос ${c.idx + 1}/${c.order.length}`;
+  setTimeout(() => say('Во что сыграем?', 'What shall we play?'), 400);
+}
+$('#openClosest').onclick = () => { if (state.closest && state.closest.done) state.closest = null; go('closest'); };
+$('#toFinal').onclick = () => go('final');
+
+/* =====================================================================
+   "КТО БЛИЖЕ?" — QUESTIONS (RU / EN)
+   ===================================================================== */
+const Q = [
+  { e:'🔔', a:108, ru:'Сколько раз бьют колокола в японских буддийских храмах в новогоднюю ночь?',
+    en:'How many times do the bells ring at Japanese Buddhist temples on New Year’s Eve?',
+    u:['ударов','strikes'], f:['Обряд «Дзёя-но канэ»: 108 ударов — по числу земных страстей в буддизме.','The “Joya no Kane” ritual: 108 strikes, one for each of the 108 earthly desires in Buddhism.'] },
+  { e:'👑', a:1700, ru:'В каком году в России впервые официально встретили Новый год 1 января — по указу Петра I?',
+    en:'In what year did Russia first officially celebrate New Year on January 1st, by order of Peter the Great?',
+    u:['год','year'], f:['Указ вышел в декабре 1699-го, а 1 января 1700 года Москву украсили еловыми ветками и устроили салют.','The decree came out in December 1699; on January 1, 1700 Moscow was decorated with fir branches and fireworks.'] },
+  { e:'🎄', a:1903, ru:'В каком году впервые напечатали стихотворение «В лесу родилась ёлочка»?',
+    en:'In what year was the poem behind Russia’s favourite New Year song, “A Little Fir Tree Was Born in the Forest”, first published?',
+    u:['год','year'], f:['Стихи Раисы Кудашевой вышли в детском журнале «Малютка», а музыку позже сочинил Леонид Бекман.','Raisa Kudasheva wrote it for the children’s magazine “Malyutka”; the music was later composed by Leonid Bekman.'] },
+  { e:'🦌', a:9, ru:'Сколько оленей везут сани Санта-Клауса, если считать Рудольфа?',
+    en:'How many reindeer pull Santa’s sleigh, counting Rudolph?',
+    u:['оленей','reindeer'], f:['Восемь оленей из стихотворения 1823 года плюс красноносый Рудольф, придуманный в 1939-м.','Eight from the 1823 poem “A Visit from St. Nicholas”, plus red-nosed Rudolph, created in 1939.'] },
+  { e:'🎬', a:1976, ru:'В каком году по телевизору впервые показали «Иронию судьбы, или С лёгким паром!»?',
+    en:'In what year did “The Irony of Fate” — the Soviet film Russians watch every New Year’s Eve — first air on TV?',
+    u:['год','year'], f:['Премьера состоялась 1 января 1976 года — и с тех пор фильм показывают почти каждый Новый год.','It premiered on January 1, 1976 and has been shown almost every New Year since.'] },
+  { e:'🎁', a:364, ru:'Сколько всего подарков получает герой песни «The Twelve Days of Christmas» за все 12 дней?',
+    en:'How many gifts in total does the singer receive over all twelve days in “The Twelve Days of Christmas”?',
+    u:['подарка','gifts'], f:['Каждый день повторяются все прежние подарки: 1+3+6+…+78 = 364 — почти по подарку на каждый день года!','Each day repeats all the earlier gifts: 1+3+6+…+78 = 364 — nearly one for every day of the year!'] },
+  { e:'💌', a:1843, ru:'В каком году в Англии напечатали первую в мире коммерческую рождественскую открытку?',
+    en:'In what year was the world’s first commercial Christmas card printed in England?',
+    u:['год','year'], f:['Её заказал сэр Генри Коул — напечатали около тысячи экземпляров.','Sir Henry Cole commissioned it — about a thousand copies were printed.'] },
+  { e:'🕛', a:11, ru:'Сколько раз за ночь наступает Новый год в России — по числу часовых поясов?',
+    en:'How many times does New Year arrive across Russia — once for each of its time zones?',
+    u:['раз','times'], f:['Первыми празднуют на Камчатке и Чукотке, последними — в Калининграде, на 10 часов позже.','Kamchatka and Chukotka celebrate first, Kaliningrad last — 10 hours later.'] },
+  { e:'🎵', a:1857, ru:'В каком году опубликовали песню «Jingle Bells»?',
+    en:'In what year was “Jingle Bells” first published?',
+    u:['год','year'], f:['Её написал американец Джеймс Пьерпонт, а в 1965 году астронавты «Джемини-6» сыграли её прямо в космосе.','Written by James Lord Pierpont; in 1965 the Gemini 6 astronauts played it in space.'] },
+  { e:'🩰', a:1892, ru:'В каком году состоялась премьера балета Чайковского «Щелкунчик»?',
+    en:'In what year did Tchaikovsky’s ballet “The Nutcracker” premiere?',
+    u:['год','year'], f:['Премьера прошла в Мариинском театре в Петербурге в декабре 1892 года.','It premiered at the Mariinsky Theatre in St Petersburg in December 1892.'] },
+  { e:'🗽', a:1907, ru:'В каком году на Таймс-сквер в Нью-Йорке впервые опустили новогодний шар?',
+    en:'In what year did the first New Year’s Eve ball drop happen in Times Square, New York?',
+    u:['год','year'], f:['Первый шар был из железа и дерева и светился сотней лампочек.','The first ball was made of iron and wood and lit by 100 light bulbs.'] },
+  { e:'🏠', a:1990, ru:'В каком году вышел фильм «Один дома»?',
+    en:'In what year was “Home Alone” released?',
+    u:['год','year'], f:['Маколею Калкину было всего 10 лет, когда фильм вышел на экраны.','Macaulay Culkin was just 10 years old when it came out.'] },
+  { e:'🎅', a:1998, ru:'В каком году Великий Устюг стал официальной родиной Деда Мороза?',
+    en:'In what year did the town of Veliky Ustyug become the official home of Ded Moroz (Russia’s Father Frost)?',
+    u:['год','year'], f:['Там у Деда Мороза есть своя резиденция и почта — туда приходят письма детей со всей страны.','Ded Moroz has his own residence and post office there, receiving letters from children all over Russia.'] },
+  { e:'🎉', a:1956, ru:'В каком году вышла комедия «Карнавальная ночь» с Людмилой Гурченко?',
+    en:'In what year was “Carnival Night”, the classic Soviet New Year comedy starring Lyudmila Gurchenko, released?',
+    u:['год','year'], f:['Песенку о пяти минутах из этого фильма до сих пор поют в новогоднюю ночь.','Its song “Five Minutes” is still sung on New Year’s Eve.'] },
+  { e:'❄️', a:6, ru:'Сколько лучей у снежинки?',
+    en:'How many points (arms) does a snowflake have?',
+    u:['лучей','points'], f:['Замерзая, молекулы воды выстраиваются в шестиугольную решётку — поэтому лучей всегда шесть.','Frozen water molecules form a hexagonal lattice — that’s why snowflakes always have six arms.'] },
+  { e:'🍇', a:12, ru:'Сколько виноградин нужно успеть съесть под бой курантов в Испании?',
+    en:'How many grapes do people in Spain eat at the stroke of midnight?',
+    u:['виноградин','grapes'], f:['По одной на каждый удар часов — чтобы удача была в каждом месяце года.','One for each chime — for good luck in every month of the year.'] },
+  { e:'🧹', t:'it', a:6, ru:'Какого числа января в Италию прилетает добрая ведьма Бефана с подарками для детей?',
+    en:'On what day of January does La Befana, the kind old witch, bring gifts to Italian children?',
+    u:['января','January'], f:['Бефана прилетает на метле в ночь на Крещение, 6 января: послушным детям — сладости, проказникам — уголёк.','She flies in on her broom the night before Epiphany, January 6: sweets for good children, a lump of coal for naughty ones.'] },
+  { e:'🎲', t:'it', a:90, ru:'Сколько чисел в мешочке в итальянском новогоднем лото «Томбола»?',
+    en:'How many numbers are in the bag in Tombola, the Italian holiday bingo?',
+    u:['чисел','numbers'], f:['Томбола родом из Неаполя, и у каждого числа от 1 до 90 есть шуточное значение — например, 90 означает «страх».','Tombola comes from Naples, and every number from 1 to 90 has a funny meaning — 90, for example, means “fear”.'] },
+  { e:'⭐', t:'it', a:8, ru:'Сколько лучей у звезды, в форме которой выпекают итальянский праздничный кекс пандоро?',
+    en:'How many points does the star shape of the Italian holiday cake pandoro have?',
+    u:['лучей','points'], f:['Рецепт и форму запатентовал кондитер Доменико Мелегатти из Вероны в 1894 году. Сахарная пудра сверху — как снег на Альпах.','Verona pastry chef Domenico Melegatti patented it in 1894. The powdered sugar on top is said to look like the snowy Alps.'] },
+  { e:'🥧', t:'gr', a:379, ru:'Греки встречают Новый год пирогом «Василопита» с монеткой внутри — в честь святого Василия, который умер 1 января. В каком году?',
+    en:'Greeks cut the Vasilopita, a New Year cake with a hidden coin, in honour of St Basil, who died on January 1st. In what year?',
+    u:['год','year'], f:['Святой Василий Великий умер в 379 году. В Греции именно он по традиции приносит детям подарки 1 января, а кому попадётся монетка — тому весь год везёт!','St Basil the Great died in 379. In Greek tradition he is the one who brings children gifts on January 1st — and whoever finds the coin has luck all year!'] },
+  { e:'👺', t:'gr', a:12, ru:'Сколько дней, по греческим поверьям, по земле бродят гоблины-проказники каликанцари?',
+    en:'According to Greek folklore, for how many days do the mischievous goblins called kallikantzaroi roam the earth?',
+    u:['дней','days'], f:['Они вылезают из-под земли на Рождество и прячутся обратно на Крещение, 6 января. Чтобы они не пролезли через трубу, в камине поддерживают огонь.','They climb out from underground at Christmas and hide again on Epiphany, January 6. To keep them out of the chimney, people keep the fire burning.'] },
+  { e:'📅', t:'gr', a:1923, ru:'В каком году Греция — последней в Европе — перешла на григорианский календарь, по которому мы встречаем Новый год?',
+    en:'In what year did Greece — the last country in Europe to do so — switch to the Gregorian calendar we use to celebrate New Year?',
+    u:['год','year'], f:['В тот год после 15 февраля сразу наступило 1 марта — 13 дней просто исчезли!','That year, February 15 was followed directly by March 1 — 13 days simply vanished!'] },
+];
+
+let timer = null;
+function stopTimer() { if (timer) { clearInterval(timer.id); timer = null; } }
+
+function renderClosest() {
+  stopTimer();
+  renderScores($('#gameScores'));
+  const c = state.closest, body = $('#closestBody');
+  if (!c) return renderIntro(body);
+  if (c.done) return renderRoundEnd(body);
+  const q = Q[c.order[c.idx]];
+  if (c.revealed) return renderReveal(body, q);
+  renderQuestion(body, q);
+}
+
+let introCount = 12, introTheme = 'all';
+const FLAG = { it: '🇮🇹', gr: '🇬🇷' };
+const shuffle = a => a.map(v => [Math.random(), v]).sort((x, y) => x[0] - y[0]).map(x => x[1]);
+function renderIntro(body) {
+  body.innerHTML = `
+  <div class="qcard">
+    <div class="qemo">🎯</div>
+    <h2 style="text-align:left;margin-top:6px">Кто ближе?<span class="en">Closest wins</span></h2>
+    <ul class="rules">
+      <li><b class="n">1</b><div>Козочка задаёт вопрос — ответ на него всегда число.<span class="en">The Goat asks a question — the answer is always a number.</span></div></li>
+      <li><b class="n">2</b><div>Каждая команда совещается и называет своё число.<span class="en">Each team agrees on one number.</span></div></li>
+      <li><b class="n">3</b><div>Самая близкая команда получает <b>1 очко</b>, а точное попадание — <b>2 очка</b>!<span class="en">The closest team gets 1 point — an exact hit gets 2!</span></div></li>
+    </ul>
+    <div class="label" style="margin-bottom:10px">Какие вопросы? <span class="en">Which questions?</span></div>
+    <div class="center" style="margin-bottom:20px"><div class="seg" id="qtheme">
+      <button data-t="all" class="${introTheme === 'all' ? 'on' : ''}">🎄 Все · All</button>
+      <button data-t="itgr" class="${introTheme === 'itgr' ? 'on' : ''}">🇮🇹🇬🇷 Италия и Греция</button>
+    </div></div>
+    <div id="countBox" style="${introTheme === 'itgr' ? 'display:none' : ''}">
+      <div class="label" style="margin-bottom:10px">Сколько вопросов? <span class="en">How many questions?</span></div>
+      <div class="center" style="margin-bottom:26px"><div class="seg" id="qcount">
+        ${[6, 10, 12, 16, Q.length].map(n => `<button data-n="${n}" class="${n === introCount ? 'on' : ''}">${n}</button>`).join('')}
+      </div></div>
+    </div>
+    <div class="label" id="itgrNote" style="margin-bottom:26px;${introTheme === 'itgr' ? '' : 'display:none'}">6 вопросов о Новом годе в Италии и Греции<span class="en">6 questions about New Year in Italy and Greece</span></div>
+    <div class="center"><button class="btn" id="go">Поехали! 🚀<small>Let's go</small></button></div>
+  </div>`;
+  $('#qcount').onclick = e => { const b = e.target.closest('button'); if (!b) return; introCount = +b.dataset.n; $('#qcount').querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b)); };
+  $('#qtheme').onclick = e => {
+    const b = e.target.closest('button'); if (!b) return; introTheme = b.dataset.t;
+    $('#qtheme').querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b));
+    $('#countBox').style.display = introTheme === 'itgr' ? 'none' : '';
+    $('#itgrNote').style.display = introTheme === 'itgr' ? '' : 'none';
+    if (introTheme === 'itgr') say('Buon anno! Καλή χρονιά!', 'Happy New Year in Italian & Greek!');
+  };
+  $('#go').onclick = () => {
+    const idx = Q.map((_, i) => i), itgr = idx.filter(i => Q[i].t), rest = idx.filter(i => !Q[i].t);
+    let order;
+    if (introTheme === 'itgr') order = shuffle(itgr);
+    else if (introCount >= Q.length) order = shuffle(idx);
+    else {
+      // always mix in some Italian & Greek questions
+      const k = Math.min(itgr.length, Math.max(2, Math.round(introCount / 3)));
+      order = shuffle(shuffle(itgr).slice(0, k).concat(shuffle(rest).slice(0, introCount - k)));
+    }
+    state.closest = { order, idx: 0, revealed: false, guesses: {}, done: false }; save(); hop(); jingle(); renderClosest();
+  };
+  setTimeout(() => say('Чем ближе — тем лучше!', 'The closer, the better!'), 300);
+}
+
+function renderQuestion(body, q) {
+  const c = state.closest;
+  body.innerHTML = `
+  <div class="qcard">
+    <div class="qmeta"><span>Вопрос ${c.idx + 1} из ${c.order.length} · Question ${c.idx + 1}/${c.order.length}</span><span style="font-size:20px">${q.t ? FLAG[q.t] + ' ' : ''}${q.e}</span></div>
+    <div class="progress"><i style="width:${(c.idx / c.order.length) * 100}%"></i></div>
+    <div class="qru">${esc(q.ru)}</div>
+    <div class="qen">${esc(q.en)}</div>
+    <div class="answers">
+      ${state.teams.map((t, i) => `
+        <label class="ans" style="--c:${t.color}">
+          <div class="who"><span class="d">${t.emoji}</span>${esc(t.name)}</div>
+          <input type="text" inputmode="decimal" placeholder="?" data-i="${i}" value="${c.guesses[i] ?? ''}" autocomplete="off">
+        </label>`).join('')}
+    </div>
+    <div class="qactions">
+      <button class="timer" id="timer" title="Таймер / Timer">
+        <svg viewBox="0 0 54 54"><circle cx="27" cy="27" r="23" fill="none" stroke="rgba(246,236,217,.15)" stroke-width="5"/>
+          <circle class="p" cx="27" cy="27" r="23" fill="none" stroke="#f2c14e" stroke-width="5" stroke-linecap="round" stroke-dasharray="144.5" stroke-dashoffset="0"/></svg>
+        <span class="t" id="timerText">60 сек<small>Start timer</small></span>
+      </button>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="ghost" id="skip">Пропустить<small>Skip</small></button>
+        <button class="btn gold" id="reveal">Показать ответ<small>Reveal answer</small></button>
+      </div>
+    </div>
+  </div>`;
+  body.querySelectorAll('.ans input').forEach(inp => inp.addEventListener('input', () => {
+    inp.value = inp.value.replace(/[^\d.,\-]/g, '');
+    c.guesses[inp.dataset.i] = inp.value; save();
+  }));
+  $('#reveal').onclick = () => { stopTimer(); c.revealed = true; save(); renderClosest(); };
+  $('#skip').onclick = () => { stopTimer(); nextQuestion(); };
+  $('#timer').onclick = startTimer;
+  lookAt = $('.qru');
+  if (q.t === 'it') return setTimeout(() => say('Buon anno! Вопрос из Италии 🇮🇹', 'Happy New Year, Italian style!'), 300);
+  if (q.t === 'gr') return setTimeout(() => say('Καλή χρονιά! Вопрос из Греции 🇬🇷', 'Happy New Year, Greek style!'), 300);
+  setTimeout(() => say(...[['Думаем, советуемся!', 'Think it over together!'], ['Хм, интересно, кто угадает?', 'Hmm, who will get it?'], ['Без гугла! 😉', 'No googling! 😉']][c.idx % 3]), 300);
+}
+
+function startTimer() {
+  if (timer) return;
+  const total = 60, ring = $('#timer circle.p'), txt = $('#timerText');
+  let left = total;
+  timer = { id: setInterval(() => {
+    left--;
+    if (!document.body.contains(ring)) return stopTimer();
+    ring.style.strokeDashoffset = 144.5 * (1 - left / total);
+    txt.innerHTML = `${left} сек<small>seconds left</small>`;
+    $('#timer').classList.toggle('low', left <= 10);
+    if (left <= 10 && left > 0) tick();
+    if (left <= 0) { stopTimer(); txt.innerHTML = 'Время!<small>Time’s up!</small>'; jingle(); say('Время вышло! Ответы!', "Time's up! Answers!"); hop(); }
+  }, 1000) };
+  ring.style.transition = 'stroke-dashoffset 1s linear';
+  txt.innerHTML = `${left} сек<small>seconds left</small>`;
+}
+
+const num = v => { if (v == null || String(v).trim() === '') return null; const n = parseFloat(String(v).replace(',', '.').replace(/\s/g, '')); return isFinite(n) ? n : null; };
+const fmt = n => Number.isInteger(n) ? String(n) : String(+n.toFixed(2)).replace('.', ',');
+
+function score(q) {
+  const c = state.closest;
+  const rows = state.teams.map((t, i) => { const g = num(c.guesses[i]); return { i, t, g, d: g === null ? null : Math.abs(g - q.a) }; });
+  const valid = rows.filter(r => r.d !== null);
+  const min = valid.length ? Math.min(...valid.map(r => r.d)) : null;
+  rows.forEach(r => { r.win = min !== null && r.d === min; r.pts = r.win ? (min === 0 ? 2 : 1) : 0; });
+  return { rows, min };
+}
+
+function renderReveal(body, q) {
+  const c = state.closest, { rows, min } = score(q);
+  // award points once
+  if (!c.awarded) { rows.forEach(r => state.teams[r.i].score += r.pts); c.awarded = true; save(); }
+  const winners = rows.filter(r => r.win);
+  renderScores($('#gameScores'), winners.map(r => r.i));
+
+  const vals = rows.filter(r => r.g !== null).map(r => r.g).concat(q.a);
+  let lo = Math.min(...vals), hi = Math.max(...vals); const pad = (hi - lo || Math.max(1, Math.abs(q.a) * .1)) * .12; lo -= pad * 1.5; hi += pad * 1.5;
+  const pos = v => ((v - lo) / (hi - lo)) * 100;
+  const sorted = [...rows].sort((a, b) => (a.d ?? Infinity) - (b.d ?? Infinity));
+  const last = c.idx === c.order.length - 1;
+  const names = winners.map(r => r.t.name).join(', ');
+  const verdict = !winners.length ? ['Никто не ответил 🤷', 'Nobody answered']
+    : min === 0 ? [`В точку! ${names} +2 🎯`, `Bull's-eye! ${names} +2`]
+    : winners.length > 1 ? [`Ничья! ${names} — по очку`, `A tie! ${names} get a point each`]
+    : [`Ближе всех — ${names}! +1`, `Closest: ${names}! +1`];
+
+  body.innerHTML = `
+  <div class="qcard">
+    <div class="qmeta"><span>Вопрос ${c.idx + 1} из ${c.order.length} · Question ${c.idx + 1}/${c.order.length}</span><span style="font-size:20px">${q.t ? FLAG[q.t] + ' ' : ''}${q.e}</span></div>
+    <div class="progress"><i style="width:${((c.idx + 1) / c.order.length) * 100}%"></i></div>
+    <div class="qen" style="margin-top:0;text-align:center">${esc(q.ru)}<br>${esc(q.en)}</div>
+    <div class="reveal-num" id="bigNum">0</div>
+    <div class="reveal-unit">${esc(q.u[0])} · <i>${esc(q.u[1])}</i></div>
+    <div class="verdict">${esc(verdict[0])}<span class="en">${esc(verdict[1])}</span></div>
+    <div class="line">
+      <div class="truth" id="truth" style="left:${pos(q.a)}%"></div>
+      ${rows.map(r => `<div class="lane ${r.win ? 'win' : ''}" style="--c:${r.t.color}"><div class="track"></div>
+        ${r.g === null ? '' : `<div class="pin ${pos(r.g) > 72 ? 'flip' : ''}" style="left:${pos(q.a)}%" data-to="${pos(r.g)}"><span class="d">${r.t.emoji}</span><span class="v">${fmt(r.g)}</span></div>`}</div>`).join('')}
+    </div>
+    <div class="results">
+      ${sorted.map(r => `<div class="res ${r.win ? 'win' : ''}" style="--c:${r.t.color}">
+        <span class="d">${r.t.emoji}</span><span class="nm">${esc(r.t.name)}</span>
+        <span class="diff">${r.g === null ? 'нет ответа · no answer' : `${fmt(r.g)} · ${r.d === 0 ? '🎯 точно · exact' : '±' + fmt(r.d)}`}</span>
+        <span class="pts">${r.pts ? '+' + r.pts : ''}</span></div>`).join('')}
+    </div>
+    <div class="fact">${esc(q.f[0])}<span class="en">${esc(q.f[1])}</span></div>
+    <div class="center" style="margin-top:18px"><button class="btn gold" id="next">${last ? 'Итоги раунда 🏆<small>Round results</small>' : 'Следующий вопрос →<small>Next question</small>'}</button></div>
+  </div>`;
+
+  // count-up animation
+  const big = $('#bigNum'), t0 = performance.now(), dur = 1200, isYear = q.a > 1000;
+  const from = isYear ? q.a - 120 : 0;
+  (function step(t) {
+    const k = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - k, 3);
+    big.textContent = fmt(Math.round(from + (q.a - from) * e));
+    if (k < 1) requestAnimationFrame(step);
+    else {
+      big.textContent = fmt(q.a);
+      body.querySelectorAll('.pin').forEach(p => p.style.left = p.dataset.to + '%');
+      if (winners.length) { fanfare(); confetti(min === 0 ? 220 : 120); hop(); say(min === 0 ? 'Невероятно! Прямо в точку!' : 'Браво! 👏', min === 0 ? 'Incredible! Spot on!' : 'Bravo!'); }
+      else { sad(); say('Эх, никто не рискнул…', 'Oh, nobody dared…'); }
+    }
+  })(t0);
+  $('#next').onclick = nextQuestion;
+}
+
+function nextQuestion() {
+  const c = state.closest;
+  if (c.idx >= c.order.length - 1) { c.done = true; save(); return renderClosest(); }
+  c.idx++; c.revealed = false; c.awarded = false; c.guesses = {}; save(); renderClosest();
+}
+
+function renderRoundEnd(body) {
+  const ranked = [...state.teams].sort((a, b) => b.score - a.score);
+  body.innerHTML = `
+  <div class="qcard" style="text-align:center">
+    <div class="qemo">🏆</div>
+    <h2>Раунд окончен!<span class="en">Round complete!</span></h2>
+    <div class="results rest" style="margin-top:22px">
+      ${ranked.map((t, k) => `<div class="res ${k === 0 ? 'win' : ''}" style="--c:${t.color}"><span class="d">${t.emoji}</span><span class="nm" style="text-align:left">${esc(t.name)}</span><span class="pts">${t.score}</span></div>`).join('')}
+    </div>
+    <div class="center" style="margin-top:16px">
+      <button class="ghost" id="again">Сыграть ещё раз<small>Play again</small></button>
+      <button class="btn gold" data-go="menu">К раундам →<small>Back to rounds</small></button>
+    </div>
+  </div>`;
+  $('#again').onclick = () => { state.closest = null; save(); renderClosest(); };
+  confetti(160); hop(); say('Отличный раунд!', 'Great round!');
+}
+
+/* =====================================================================
+   FINAL
+   ===================================================================== */
+function renderFinal() {
+  const ranked = [...state.teams].sort((a, b) => b.score - a.score);
+  const top = ranked.slice(0, 3), order = [top[1], top[0], top[2]].filter(Boolean);
+  const hts = { 0: 170, 1: 120, 2: 90 }, medal = ['🥇', '🥈', '🥉'], bg = ['#f2c14e', '#d9dde3', '#e0a46a'];
+  $('#podium').innerHTML = order.map(t => {
+    const k = ranked.indexOf(t);
+    return `<div class="step" style="--c:${t.color}"><div style="font-size:30px">${medal[k]}</div><div class="d">${t.emoji}</div>
+      <div class="nm">${esc(t.name)}</div><div class="block" style="height:${hts[k]}px;background:${bg[k]};animation-delay:${.2 + (2 - k) * .25}s">${t.score}</div></div>`;
+  }).join('');
+  $('#restList').innerHTML = ranked.slice(3).map((t, k) =>
+    `<div class="res" style="--c:${t.color}"><span class="d">${t.emoji}</span><span class="nm">${k + 4}. ${esc(t.name)}</span><span class="pts">${t.score}</span></div>`).join('');
+  setTimeout(() => { confetti(260); fanfare(); hop(); say(`Победа: ${ranked[0].name}! 🎉`, `${ranked[0].name} win!`, 5000); }, 900);
+}
+$('#newGame').onclick = () => { state.teams.forEach(t => t.score = 0); state.closest = null; save(); go('teams'); };
+
+/* =====================================================================
+   DECOR: garland, snow, confetti
+   ===================================================================== */
+(() => {
+  const g = $('#garland');
+  const p = el('path', { d: 'M0 8 Q125 44 250 8 T500 8 T750 8 T1000 8', stroke: '#2b1a12', 'stroke-width': 2, fill: 'none' }, g), L = p.getTotalLength();
+  const colors = ['#f2c14e', '#d1453b', '#5ec27a', '#5aa6d6', '#f29ac0'];
+  for (let i = 0, s = 20; s < L; s += 46, i++) {
+    const pt = p.getPointAtLength(s);
+    el('rect', { x: pt.x - 3, y: pt.y - 1, width: 6, height: 5, fill: '#3a2a20' }, g);
+    const b = el('ellipse', { cx: pt.x, cy: pt.y + 10, rx: 5, ry: 8, fill: colors[i % colors.length], class: 'bulb' }, g);
+    b.style.animationDelay = (i % 5) * .3 + 's';
+  }
+})();
+const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+(() => {
+  const c = $('#snow'), x = c.getContext('2d'); let W, H, flakes = [];
+  function size() {
+    const dpr = Math.min(devicePixelRatio || 1, 2); W = innerWidth; H = innerHeight;
+    c.width = W * dpr; c.height = H * dpr; x.setTransform(dpr, 0, 0, dpr, 0, 0);
+    flakes = Array.from({ length: Math.round(W * H / 9000) }, () => ({ x: Math.random() * W, y: Math.random() * H, r: Math.random() * 2.4 + .6, s: Math.random() * .6 + .25, w: Math.random() * 6.28 }));
+  }
+  size(); addEventListener('resize', size);
+  (function loop() {
+    x.clearRect(0, 0, W, H); x.fillStyle = '#fff';
+    for (const f of flakes) {
+      if (!reduceMotion) { f.y += f.s * f.r * .6; f.w += .01; f.x += Math.sin(f.w) * .35; }
+      if (f.y > H + 5) { f.y = -5; f.x = Math.random() * W; }
+      x.globalAlpha = .3 + f.r / 4.5; x.beginPath(); x.arc(f.x, f.y, f.r, 0, 6.283); x.fill();
+    }
+    x.globalAlpha = 1; requestAnimationFrame(loop);
+  })();
+})();
+const confetti = (() => {
+  const c = $('#confetti'), x = c.getContext('2d'); let parts = [], running = false;
+  const cols = ['#f2c14e', '#e2574c', '#5ec27a', '#5aa6d6', '#f29ac0', '#fff'];
+  function loop() {
+    const W = c.width = innerWidth, H = c.height = innerHeight; x.clearRect(0, 0, W, H);
+    parts = parts.filter(p => p.y < H + 20);
+    for (const p of parts) {
+      p.vy += .25; p.vx *= .99; p.x += p.vx; p.y += p.vy; p.r += p.vr;
+      x.save(); x.translate(p.x, p.y); x.rotate(p.r); x.fillStyle = p.c; x.fillRect(-p.w / 2, -p.h / 2, p.w, p.h * Math.abs(Math.cos(p.r * 2))); x.restore();
+    }
+    if (parts.length) requestAnimationFrame(loop); else { running = false; x.clearRect(0, 0, W, H); }
+  }
+  return n => {
+    if (reduceMotion) return;
+    for (let i = 0; i < n; i++) {
+      const side = i % 2;
+      parts.push({ x: side ? innerWidth + 10 : -10, y: innerHeight * .55, vx: (side ? -1 : 1) * (6 + Math.random() * 10), vy: -(8 + Math.random() * 12),
+        r: Math.random() * 6, vr: (Math.random() - .5) * .3, w: 6 + Math.random() * 6, h: 10 + Math.random() * 8, c: cols[i % cols.length] });
+    }
+    if (!running) { running = true; loop(); }
+  };
+})();
+
+/* ---------- start ---------- */
+placeGoat();
+requestAnimationFrame(() => { placeGoat(); host.classList.remove('no-anim'); });
+document.fonts && document.fonts.ready.then(() => { host.classList.add('no-anim'); placeGoat(); requestAnimationFrame(() => host.classList.remove('no-anim')); });
+setTimeout(() => say('Привет! Я Козочка 🎄', "Hi! I'm the New Year Goat"), 900);
+</script>
+</body>
+</html>
