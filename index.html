@@ -6,75 +6,128 @@
 <title>Ёлки-козёлки! Семейная новогодняя игра</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Nunito:ital,wght@0,400;0,600;0,800;0,900;1,600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Oranienbaum&family=Marck+Script&family=PT+Sans:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
 <style>
   :root{
-    --pine:#0f2b20; --pine-deep:#081a13; --cream:#f6ecd9; --gold:#f2c14e;
-    --red:#d1453b; --ink:#4a2f22; --card:rgba(246,236,217,.07); --line:rgba(246,236,217,.16);
+    --wall:#181e1e; --wine:#501d1c; --gold:#bd9152; --gold-l:#dcbc84; --gold-d:#9a7038;
+    --paper:#f0e3c7; --paper-2:#e4cfa6; --ink:#2a1c16; --ink-2:#6e5646;
+    --red:#a3322a; --red-d:#74201b; --cream:#f3e6cb; --line:rgba(189,145,82,.38);
   }
   *{box-sizing:border-box;margin:0;padding:0}
   html,body{height:100%}
-  body{
-    font-family:'Nunito',system-ui,sans-serif;color:var(--cream);
-    background:radial-gradient(ellipse at 50% 45%, #1d4a36 0%, var(--pine) 45%, var(--pine-deep) 100%) fixed;
-    overflow:hidden;min-height:100vh;
-  }
+  body{font-family:'PT Sans',system-ui,sans-serif;color:var(--cream);background:var(--wall);overflow:hidden;min-height:100vh}
   button{font-family:inherit}
+
+  /* ---------- the room ---------- */
+  .room{position:fixed;inset:0;z-index:0;pointer-events:none}
+  .room::before{content:"";position:absolute;inset:0;opacity:.6;background-size:150px 150px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Cg fill='none' stroke='%23501d1c' stroke-width='2.4'%3E%3Cpath d='M75 8 L142 75 L75 142 L8 75Z'/%3E%3Cpath d='M75 30 L120 75 L75 120 L30 75Z'/%3E%3Cpath d='M75 52 L98 75 L75 98 L52 75Z' fill='%23501d1c'/%3E%3C/g%3E%3Cg fill='%23501d1c'%3E%3Cpath d='M0 -14 L14 0 L0 14 L-14 0Z M150 -14 L164 0 L150 14 L136 0Z M0 136 L14 150 L0 164 L-14 150Z M150 136 L164 150 L150 164 L136 150Z'/%3E%3C/g%3E%3Cg fill='%23bd9152' opacity='.45'%3E%3Ccircle cx='75' cy='75' r='4'/%3E%3Ccircle cx='75' cy='20' r='2.4'/%3E%3Ccircle cx='130' cy='75' r='2.4'/%3E%3Ccircle cx='75' cy='130' r='2.4'/%3E%3Ccircle cx='20' cy='75' r='2.4'/%3E%3Ccircle cx='41' cy='41' r='1.8'/%3E%3Ccircle cx='109' cy='41' r='1.8'/%3E%3Ccircle cx='41' cy='109' r='1.8'/%3E%3Ccircle cx='109' cy='109' r='1.8'/%3E%3C/g%3E%3C/svg%3E")}
+  .room::after{content:"";position:absolute;inset:0;background:
+      radial-gradient(ellipse 55% 45% at 50% 40%, rgba(222,166,88,.30), transparent 70%),
+      radial-gradient(ellipse 120% 70% at 50% 115%, rgba(80,29,28,.9), transparent 60%),
+      radial-gradient(ellipse at center, transparent 35%, rgba(8,10,10,.75) 100%)}
+  .grain{position:fixed;inset:0;z-index:40;pointer-events:none;opacity:.32;mix-blend-mode:multiply;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .2  0 0 0 0 .14  0 0 0 0 .1  0 0 0 .5 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
   #snow,#confetti{position:fixed;inset:0;pointer-events:none;z-index:1}
   #confetti{z-index:20}
-  .garland{position:fixed;top:0;left:0;width:100%;height:60px;z-index:2;pointer-events:none}
-  .bulb{animation:twinkle 1.6s ease-in-out infinite}
-  @keyframes twinkle{0%,100%{opacity:1}50%{opacity:.35}}
-  .drift{position:fixed;left:0;bottom:-2px;width:100%;height:80px;z-index:5;pointer-events:none}
+
+  /* ---------- top decor: garland, tinsel, ornaments ---------- */
+  .lights{position:fixed;top:0;left:0;width:100%;height:64px;z-index:8;cursor:pointer}
+  .lights .bulb{transition:opacity .25s, filter .25s}
+  .lights .bulb.off{opacity:.22;filter:none}
+  .lights .bulb.on{filter:url(#bulbGlow)}
+  .orn{position:fixed;top:0;z-index:7;transform-origin:50% 0;pointer-events:none;will-change:transform}
+  .orn .str{position:absolute;left:50%;top:0;width:1px;background:linear-gradient(#000,#8a7a62);transform:translateX(-50%)}
+  .orn svg{position:absolute;left:50%;transform:translateX(-50%);pointer-events:auto;cursor:pointer;
+    filter:drop-shadow(0 10px 12px rgba(0,0,0,.45))}
+  body.corner .orn.inner{display:none}
+  @media (max-width:900px){.orn.inner{display:none}.orn{transform:scale(.8)}}
+
+  /* ---------- table at the bottom ---------- */
+  .table{position:fixed;left:0;right:0;bottom:0;height:96px;z-index:5;pointer-events:none}
+  .table .cloth{position:absolute;inset:auto 0 0 0;height:56px;
+    background:linear-gradient(#e9dfca 0 10px, #f6f0e2 10px);box-shadow:0 -1px 0 rgba(255,255,255,.4)}
+  .table .cloth::before{content:"";position:absolute;left:0;right:0;top:22px;height:10px;opacity:.85;background-size:20px 10px;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='10'%3E%3Cpath d='M3 1 L9 9 M9 1 L3 9' stroke='%23a3322a' stroke-width='1.6'/%3E%3Ccircle cx='15' cy='5' r='1.4' fill='%23bd9152'/%3E%3C/svg%3E")}
+  .table .cloth::after{content:"";position:absolute;left:0;right:0;top:38px;height:2px;background:#a3322a;opacity:.55}
+  .thing{position:absolute;bottom:44px;pointer-events:auto;cursor:pointer;transform-origin:50% 100%;transition:transform .2s;
+    filter:drop-shadow(0 6px 4px rgba(0,0,0,.25))}
+  .thing:hover{transform:translateY(-3px) rotate(-2deg)}
+  .thing.shake{animation:shake .5s}
+  @keyframes shake{20%{transform:rotate(-8deg)}40%{transform:rotate(7deg)}60%{transform:rotate(-5deg)}80%{transform:rotate(3deg)}}
+  .cork{position:fixed;z-index:21;pointer-events:none}
+  body.corner .tbl-left,body.corner .thing.opt,body.corner [data-k=glass2]{display:none}
+  body.corner [data-k=bottle]{right:calc(2.5% + 104px)!important}
+  @media (max-width:700px){.thing.opt{display:none}.table{height:84px}}
 
   /* ---------- screens ---------- */
-  .screen{position:fixed;inset:0;z-index:3;overflow-y:auto;display:none;flex-direction:column;align-items:center;
-    padding:60px 18px 170px}
+  .screen{position:fixed;inset:0;z-index:3;overflow-y:auto;display:none;flex-direction:column;align-items:center;padding:74px 18px 150px}
   .screen.active{display:flex;animation:fadeUp .45s ease both}
   @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
   .wrap{width:100%;max-width:920px}
-  .en{display:block;font-style:italic;font-weight:600;opacity:.62;font-size:.62em;letter-spacing:.01em;margin-top:2px}
-  .eyebrow{font-weight:800;letter-spacing:.28em;text-transform:uppercase;font-size:12px;color:var(--gold);opacity:.9}
-  h1{font-family:'Pacifico',cursive;font-weight:400;font-size:clamp(40px,7vw,78px);line-height:1.15;
-    color:var(--cream);text-shadow:0 3px 0 #7a2a22, 0 10px 30px rgba(0,0,0,.35)}
-  h1 span{color:var(--gold)}
-  h2{font-family:'Pacifico',cursive;font-weight:400;font-size:clamp(30px,4.6vw,46px);line-height:1.2;
-    text-shadow:0 2px 0 #7a2a22;text-align:center}
-  h2 .en{font-family:'Nunito';font-size:16px;text-shadow:none;margin-top:4px}
+  .en{display:block;font-style:italic;font-weight:400;opacity:.7;font-size:.66em;margin-top:2px}
+  .eyebrow{font-family:'Oranienbaum',serif;letter-spacing:.32em;text-transform:uppercase;font-size:14px;color:var(--gold-l)}
+  h1{font-family:'Marck Script',cursive;font-weight:400;font-size:clamp(52px,8.5vw,104px);line-height:1;color:var(--cream);
+    text-shadow:0 2px 0 var(--wine),0 0 40px rgba(222,166,88,.35)}
+  h2{font-family:'Oranienbaum',serif;font-weight:400;font-size:clamp(32px,4.8vw,54px);line-height:1.1;letter-spacing:.06em;text-transform:uppercase;text-align:center;color:var(--cream)}
+  h2 .en{font-family:'Marck Script',cursive;text-transform:none;letter-spacing:0;font-style:normal;color:var(--gold-l);font-size:24px;opacity:1;margin-top:6px}
+  .divider{width:160px;height:14px;margin:10px auto 0;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 14'%3E%3Cpath d='M0 7 H62 M98 7 H160' stroke='%23bd9152' stroke-width='1'/%3E%3Cpath d='M80 1 L86 7 L80 13 L74 7Z M68 7 L71 4 L74 7 L71 10Z M86 7 L89 4 L92 7 L89 10Z' fill='%23bd9152'/%3E%3C/svg%3E") center/contain no-repeat}
 
-  .topbar{width:100%;max-width:920px;display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px;flex-wrap:wrap}
-  .ghost{background:rgba(255,255,255,.06);border:1.5px solid var(--line);color:var(--cream);border-radius:999px;
-    padding:9px 16px;font-weight:800;font-size:14px;cursor:pointer;transition:.2s}
-  .ghost:hover{background:rgba(255,255,255,.14)}
-  .ghost small{font-weight:600;font-style:italic;opacity:.6;margin-left:4px}
+  .topbar{width:100%;max-width:920px;display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:22px;flex-wrap:wrap}
+  .ghost{background:rgba(24,30,30,.6);border:1px solid var(--line);color:var(--cream);border-radius:999px;
+    padding:9px 16px;font-weight:700;font-size:14px;cursor:pointer;transition:.2s;backdrop-filter:blur(4px)}
+  .ghost:hover{border-color:var(--gold);background:rgba(80,29,28,.6)}
+  .ghost small{font-weight:400;font-style:italic;opacity:.65;margin-left:4px}
 
-  .btn{font:800 19px 'Nunito',sans-serif;border:0;cursor:pointer;color:#fff;padding:15px 32px;border-radius:999px;
-    background:linear-gradient(180deg,#e2574c,#b8352c);box-shadow:0 6px 0 #7d2019, 0 14px 30px rgba(209,69,59,.4);
-    transition:transform .15s, box-shadow .15s, opacity .2s}
-  .btn small{display:block;font-size:12px;font-weight:600;font-style:italic;opacity:.8;margin-top:1px}
-  .btn:hover{transform:translateY(-2px)}
-  .btn:active{transform:translateY(4px);box-shadow:0 2px 0 #7d2019,0 6px 14px rgba(209,69,59,.4)}
-  .btn.gold{background:linear-gradient(180deg,#f7d06a,#d9a22b);color:#4a2f22;box-shadow:0 6px 0 #8f6514,0 14px 30px rgba(242,193,78,.35)}
+  .btn{font:700 16px 'PT Sans',sans-serif;letter-spacing:.1em;text-transform:uppercase;border:1px solid var(--gold);cursor:pointer;color:var(--cream);
+    padding:14px 30px;border-radius:10px;background:linear-gradient(180deg,#b63d32,#7a221d);
+    box-shadow:0 0 0 4px rgba(189,145,82,.14),0 14px 28px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.22);transition:transform .15s, filter .2s}
+  .btn small{display:block;font-size:12px;font-weight:400;font-style:italic;letter-spacing:.02em;text-transform:none;opacity:.8;margin-top:2px}
+  .btn:hover{transform:translateY(-2px);filter:brightness(1.08)}
+  .btn:active{transform:translateY(2px)}
+  .btn.gold{background:linear-gradient(180deg,#d7b06c,#a57836);color:var(--ink);border-color:#f2deb0}
   .btn:disabled{opacity:.45;pointer-events:none}
-  .icon-btn{width:52px;height:52px;border-radius:50%;border:2px solid rgba(246,236,217,.35);background:rgba(255,255,255,.06);
-    color:var(--cream);font-size:22px;cursor:pointer;transition:.2s}
-  .icon-btn:hover{background:rgba(255,255,255,.14)}
+  .icon-btn{width:50px;height:50px;border-radius:50%;border:1px solid var(--line);background:rgba(24,30,30,.6);
+    color:var(--gold-l);cursor:pointer;transition:.2s;display:grid;place-items:center}
+  .icon-btn:hover{border-color:var(--gold)}
+
+  /* paper postcard */
+  .paper{position:relative;color:var(--ink);border-radius:6px;
+    background:radial-gradient(ellipse at 30% 20%, #f6ecd6, var(--paper) 50%, #e6d3ad 100%);
+    border:1px solid rgba(154,112,56,.45);box-shadow:0 26px 50px rgba(0,0,0,.5)}
+  .paper::before,.paper::after{content:"";position:absolute;pointer-events:none;border-radius:3px}
+  .paper::before{inset:var(--in,9px);border:1px solid rgba(154,112,56,.75)}
+  .paper::after{inset:calc(var(--in,9px) + 3px);border:1px solid rgba(154,112,56,.35)}
+  .countdown .paper{--in:4px}
+  .countdown .paper::after{display:none}
+
+  /* ornament-ball avatars */
+  .ball{position:relative;border-radius:50%;background:radial-gradient(circle at 34% 28%, rgba(255,255,255,.65), rgba(255,255,255,0) 32%), radial-gradient(circle at 65% 75%, rgba(0,0,0,.25), transparent 60%), var(--c);
+    color:#fff8e8;display:grid;place-items:center;font-family:'Oranienbaum',serif;text-shadow:0 1px 2px rgba(0,0,0,.35)}
+  .ball.cap::before{content:"";position:absolute;top:-6px;left:50%;width:30%;height:8px;transform:translateX(-50%);border-radius:2px 2px 1px 1px;
+    background:linear-gradient(90deg,#9a7038,#e8cc8d,#9a7038)}
 
   /* ---------- home ---------- */
-  #scr-home{justify-content:center;gap:6px;text-align:center;padding-bottom:90px}
-  #goatSlot{width:min(400px,78vw);height:min(50vh,460px);flex:none}
-  .actions{display:flex;gap:12px;align-items:center;margin-top:10px;flex-wrap:wrap;justify-content:center}
-  .hint{font-size:13px;opacity:.6;margin-top:8px}
+  #scr-home{justify-content:center;gap:4px;text-align:center;padding:84px 18px 104px}
+  .countdown{display:flex;align-items:flex-start;gap:8px;justify-content:center;margin:14px 0 4px}
+  .countdown .cell{width:76px;padding:8px 0 7px;text-align:center}
+  .countdown .num{font-family:'Oranienbaum',serif;font-size:38px;line-height:1}
+  .countdown .lbl{font-size:10px;line-height:1.25;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);margin-top:3px}
+  .countdown .sep{font-family:'Oranienbaum';font-size:34px;color:var(--gold);padding-top:8px}
+  .cd-title{font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-l);margin-top:10px}
+  .cd-title i{text-transform:none;letter-spacing:0;opacity:.7}
+  #goatSlot{width:min(340px,72vw);height:min(34vh,330px);flex:none}
+  .actions{display:flex;gap:12px;align-items:center;margin-top:8px;flex-wrap:wrap;justify-content:center}
+  .hint{font-size:13.5px;color:var(--cream);opacity:.65;margin-top:8px;max-width:560px}
+  .hint .en{font-size:12px}
 
   /* ---------- goat host ---------- */
-  #host{position:fixed;z-index:6;left:0;top:0;width:300px;height:400px;display:flex;justify-content:center;
-    transition:left .7s cubic-bezier(.5,0,.2,1), top .7s cubic-bezier(.5,0,.2,1), width .7s cubic-bezier(.5,0,.2,1), height .7s cubic-bezier(.5,0,.2,1);
-    pointer-events:none}
+  #host{position:fixed;z-index:6;left:0;top:0;width:300px;height:400px;display:flex;justify-content:center;pointer-events:none;
+    transition:left .7s cubic-bezier(.5,0,.2,1), top .7s cubic-bezier(.5,0,.2,1), width .7s cubic-bezier(.5,0,.2,1), height .7s cubic-bezier(.5,0,.2,1)}
   #host.no-anim{transition:none}
   .glow{position:absolute;left:50%;top:52%;width:120%;aspect-ratio:1;transform:translate(-50%,-50%);
-    background:radial-gradient(circle, rgba(255,214,140,.32) 0%, rgba(255,214,140,.08) 40%, transparent 65%);pointer-events:none}
+    background:radial-gradient(circle, rgba(255,205,130,.28) 0%, rgba(255,205,130,.07) 40%, transparent 65%);pointer-events:none}
   #goat{height:100%;width:auto;overflow:visible;cursor:pointer;position:relative;pointer-events:auto;
-    filter:drop-shadow(0 18px 24px rgba(0,0,0,.35));-webkit-tap-highlight-color:transparent}
+    filter:drop-shadow(0 16px 20px rgba(0,0,0,.45));-webkit-tap-highlight-color:transparent}
   #goat.hop{animation:hop .55s cubic-bezier(.3,1.6,.5,1)}
   @keyframes hop{0%{transform:translateY(0)}35%{transform:translateY(-22px) scale(1.02,.98)}70%{transform:translateY(0) scale(1.03,.96)}100%{transform:none}}
   #goat.sad{animation:sad 1s ease}
@@ -90,167 +143,191 @@
   .blush{transition:opacity .3s}
   #goat.excited .blush{opacity:1}
   #goat.excited .sparkle{animation-duration:.9s}
-  .bubble{position:absolute;top:2%;left:70%;width:max-content;max-width:230px;padding:11px 15px;border-radius:18px;
-    background:var(--cream);color:var(--ink);font-weight:800;font-size:15px;line-height:1.3;
-    box-shadow:0 10px 30px rgba(0,0,0,.3);opacity:0;transform:translateY(8px) scale(.9);
+  .bubble{position:absolute;top:2%;left:70%;width:max-content;max-width:240px;padding:11px 15px;border-radius:12px;
+    background:var(--paper);color:var(--ink);font-weight:700;font-size:15px;line-height:1.3;border:1px solid var(--gold);
+    box-shadow:0 12px 30px rgba(0,0,0,.4);opacity:0;transform:translateY(8px) scale(.9);
     transition:.3s cubic-bezier(.3,1.4,.5,1);pointer-events:none;z-index:4}
-  .bubble i{display:block;font-weight:600;font-size:12.5px;opacity:.65;margin-top:3px}
-  .bubble::after{content:"";position:absolute;left:18px;bottom:-9px;border:10px solid transparent;border-top-color:var(--cream);border-bottom:0}
+  .bubble i{display:block;font-weight:400;font-size:12.5px;color:var(--ink-2);margin-top:3px}
+  .bubble::after{content:"";position:absolute;left:18px;bottom:-9px;border:9px solid transparent;border-top-color:var(--paper);border-bottom:0}
   .bubble.show{opacity:1;transform:none}
   body.corner .glow{opacity:.6}
   body.corner .sparkle{display:none}
   body.corner .bubble{top:-8%;left:82%}
 
   /* ---------- teams ---------- */
-  .stepper{display:flex;align-items:center;justify-content:center;gap:18px;margin:18px 0 6px}
-  .stepper button{width:54px;height:54px;border-radius:50%;border:2px solid var(--line);background:rgba(255,255,255,.07);
-    color:var(--cream);font-size:28px;font-weight:800;cursor:pointer;transition:.2s}
-  .stepper button:hover{background:rgba(255,255,255,.15)}
+  .stepper{display:flex;align-items:center;justify-content:center;gap:18px;margin:22px 0 6px}
+  .stepper button{width:52px;height:52px;border-radius:50%;border:1px solid var(--gold);background:rgba(24,30,30,.6);
+    color:var(--gold-l);font-size:26px;cursor:pointer;transition:.2s}
+  .stepper button:hover{background:rgba(80,29,28,.7)}
   .stepper button:disabled{opacity:.3;pointer-events:none}
-  .count{font-family:'Pacifico';font-size:56px;min-width:70px;text-align:center;color:var(--gold);line-height:1}
-  .label{text-align:center;font-weight:800;font-size:16px}
+  .count{font-family:'Oranienbaum',serif;font-size:64px;min-width:70px;text-align:center;color:var(--gold-l);line-height:1}
+  .label{text-align:center;font-weight:700;font-size:16px}
   .label .en{font-size:13px}
-  .teams{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;margin:24px 0}
-  .team{position:relative;background:var(--card);border:1.5px solid var(--line);border-radius:22px;padding:16px;
-    display:flex;align-items:center;gap:12px;animation:pop .35s cubic-bezier(.3,1.5,.5,1) both;border-left:6px solid var(--c)}
-  @keyframes pop{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:none}}
-  .avatar{width:58px;height:58px;flex:none;border-radius:50%;background:var(--c);display:grid;place-items:center;font:400 28px 'Pacifico',cursive;color:#fff;text-shadow:0 2px 0 rgba(0,0,0,.2);
-    border:0;cursor:pointer;box-shadow:inset 0 -5px 0 rgba(0,0,0,.18);transition:transform .2s}
-  .avatar:hover{transform:rotate(-10deg) scale(1.06)}
+  .teams{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:18px;margin:26px 0}
+  .team{padding:22px 22px 20px;display:flex;align-items:center;gap:14px;animation:pop .35s cubic-bezier(.3,1.5,.5,1) both}
+  .team:nth-child(odd){transform:rotate(-.6deg)} .team:nth-child(even){transform:rotate(.5deg)}
+  @keyframes pop{from{opacity:0;scale:.9}to{opacity:1;scale:1}}
+  .avatar{width:58px;height:58px;flex:none;font-size:30px;border:0;cursor:pointer;transition:transform .25s}
+  .avatar:hover{transform:rotate(-12deg)}
   .team .fields{flex:1;min-width:0}
-  .team .num{font-size:11px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;opacity:.55}
-  .team input{width:100%;background:transparent;border:0;border-bottom:2px dashed var(--line);color:var(--cream);
-    font:800 20px 'Nunito';padding:4px 0;outline:none}
-  .team input:focus{border-bottom-color:var(--c)}
-  .dice{background:none;border:0;color:var(--cream);cursor:pointer;opacity:.7;transition:.2s}
-  .dice:hover{opacity:1;transform:rotate(20deg)}
+  .team .num{font-size:10.5px;font-weight:700;letter-spacing:.1em;white-space:nowrap;text-transform:uppercase;color:var(--ink-2)}
+  .team input{width:100%;background:transparent;border:0;border-bottom:1px dashed rgba(42,28,22,.35);color:var(--ink);
+    font:400 26px 'Oranienbaum',serif;padding:4px 0;outline:none}
+  .team input:focus{border-bottom:1px solid var(--c)}
+  .dice{background:none;border:0;color:var(--ink-2);cursor:pointer;transition:.2s}
+  .dice:hover{color:var(--red);transform:rotate(20deg)}
   .center{display:flex;justify-content:center;gap:12px;flex-wrap:wrap}
 
-  /* ---------- scoreboard ---------- */
+  /* ---------- scoreboard chips ---------- */
   .scores{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
-  .chip{display:flex;align-items:center;gap:8px;padding:6px 14px 6px 6px;border-radius:999px;background:var(--card);
-    border:1.5px solid var(--line);font-weight:800;font-size:15px;transition:.3s}
-  .chip .dot{width:30px;height:30px;border-radius:50%;background:var(--c);display:grid;place-items:center;font:900 15px 'Nunito';color:#fff}
-  .chip b{color:var(--gold);font-size:18px;margin-left:2px}
-  .chip.bump{animation:bump .7s ease}
-  @keyframes bump{30%{transform:scale(1.18);border-color:var(--gold);box-shadow:0 0 24px rgba(242,193,78,.5)}}
+  .chip{display:flex;align-items:center;gap:8px;padding:5px 14px 5px 5px;border-radius:999px;background:rgba(24,30,30,.65);
+    border:1px solid var(--line);font-weight:700;font-size:15px;transition:.3s;backdrop-filter:blur(4px)}
+  .chip .dot{width:30px;height:30px;font-size:16px}
+  .chip b{font-family:'Oranienbaum';color:var(--gold-l);font-size:21px;font-weight:400;margin-left:2px}
+  .chip.bump{animation:bump .8s ease}
+  @keyframes bump{30%{transform:scale(1.15);border-color:var(--gold);box-shadow:0 0 26px rgba(189,145,82,.6)}}
 
   /* ---------- menu ---------- */
-  .rounds{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px;margin:26px 0}
-  .round{position:relative;text-align:left;border-radius:24px;padding:22px;border:1.5px solid var(--line);
-    background:linear-gradient(160deg,rgba(255,255,255,.1),rgba(255,255,255,.03));color:var(--cream);cursor:pointer;transition:.25s;min-height:170px}
-  .round:hover{transform:translateY(-4px);border-color:var(--gold)}
-  .round .emo{color:var(--gold);height:44px}
-  .round h3{font-size:22px;font-weight:900;margin-top:8px}
-  .round p{font-size:14px;opacity:.75;margin-top:6px;line-height:1.4}
-  .round.soon{opacity:.45;cursor:default}
-  .round.soon:hover{transform:none;border-color:var(--line)}
-  .tag{position:absolute;top:16px;right:16px;font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;
-    padding:4px 10px;border-radius:999px;background:rgba(242,193,78,.18);color:var(--gold)}
+  .rounds{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:22px;margin:30px 0}
+  .round{text-align:left;padding:28px 26px;border:0;cursor:pointer;transition:transform .25s;min-height:200px;font-family:inherit}
+  .round:nth-child(1){transform:rotate(-1.2deg)} .round:nth-child(2){transform:rotate(.8deg)} .round:nth-child(3){transform:rotate(-.5deg)}
+  .round:hover{transform:rotate(0) translateY(-5px)}
+  .round .emo{color:var(--red);height:44px}
+  .round h3{font-family:'Oranienbaum',serif;font-weight:400;font-size:30px;margin-top:10px;color:var(--ink)}
+  .round p{font-size:14.5px;color:var(--ink-2);margin-top:6px;line-height:1.45}
+  .round.soon{cursor:default;opacity:.72}
+  .round.soon:hover{transform:rotate(.8deg)}
+  .tag{position:absolute;top:20px;right:20px;font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+    padding:5px 10px;border:1.5px solid var(--red);color:var(--red);border-radius:4px;transform:rotate(6deg);opacity:.85}
 
   /* ---------- closest game ---------- */
-  .qcard{width:100%;max-width:920px;background:linear-gradient(170deg,rgba(255,255,255,.1),rgba(255,255,255,.035));
-    border:1.5px solid var(--line);border-radius:30px;padding:clamp(20px,4vw,40px);box-shadow:0 30px 60px rgba(0,0,0,.25);
-    animation:fadeUp .4s ease both}
-  .qmeta{display:flex;justify-content:space-between;align-items:center;font-weight:800;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}
-  .progress{height:6px;border-radius:9px;background:rgba(255,255,255,.1);margin:12px 0 22px;overflow:hidden}
-  .progress i{display:block;height:100%;background:linear-gradient(90deg,var(--gold),#e2574c);border-radius:9px;transition:width .5s}
-  .qemo{display:none}
-  .qru{font-size:clamp(22px,3.4vw,34px);font-weight:900;line-height:1.25;margin-top:10px}
-  .qen{font-size:clamp(16px,2.2vw,21px);font-style:italic;font-weight:600;opacity:.66;line-height:1.35;margin-top:10px}
-  .answers{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px;margin:28px 0 22px}
-  .ans{border-radius:18px;padding:12px 14px;background:rgba(0,0,0,.18);border:2px solid transparent;transition:.2s}
-  .ans:focus-within{border-color:var(--c)}
-  .ans .who{display:flex;align-items:center;gap:8px;font-weight:800;font-size:15px}
-  .ans .who span.d{width:26px;height:26px;border-radius:50%;background:var(--c);display:grid;place-items:center;font:900 12px 'Nunito';color:#fff}
-  .ans input{width:100%;margin-top:8px;background:transparent;border:0;outline:none;color:var(--cream);
-    font:900 32px 'Nunito';-moz-appearance:textfield}
-  .ans input::placeholder{color:rgba(246,236,217,.25)}
-  .ans input::-webkit-outer-spin-button,.ans input::-webkit-inner-spin-button{-webkit-appearance:none}
+  .qcard{width:100%;max-width:920px;padding:clamp(26px,4.5vw,48px);animation:fadeUp .4s ease both}
+  .qmeta{display:flex;justify-content:space-between;align-items:center;font-weight:700;font-size:12.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--red)}
+  .progress{height:4px;border-radius:9px;background:rgba(42,28,22,.12);margin:12px 0 24px;overflow:hidden}
+  .progress i{display:block;height:100%;background:linear-gradient(90deg,var(--red),var(--gold));transition:width .5s}
+  .qru{font-family:'Oranienbaum',serif;font-size:clamp(25px,3.6vw,40px);line-height:1.18;color:var(--ink)}
+  .qen{font-size:clamp(16px,2.1vw,20px);font-style:italic;color:var(--ink-2);line-height:1.4;margin-top:12px}
+  .answers{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px;margin:28px 0 24px}
+  .ans{border-radius:8px;padding:12px 14px;background:rgba(80,29,28,.05);border:1px dashed rgba(42,28,22,.3);transition:.2s;display:block}
+  .ans:focus-within{border:1px solid var(--c);background:rgba(255,255,255,.35)}
+  .ans .who{display:flex;align-items:center;gap:8px;font-weight:700;font-size:15px;color:var(--ink)}
+  .ans .who .d{width:26px;height:26px;font-size:14px}
+  .ans input{width:100%;margin-top:6px;background:transparent;border:0;outline:none;color:var(--ink);font:400 38px 'Oranienbaum',serif;-moz-appearance:textfield}
+  .ans input::placeholder{color:rgba(42,28,22,.22)}
   .qactions{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
-  .timer{display:flex;align-items:center;gap:10px;cursor:pointer;background:none;border:0;color:var(--cream);font-weight:800}
+  .qcard .ghost{background:transparent;color:var(--ink);border-color:rgba(42,28,22,.3);backdrop-filter:none}
+  .qcard .ghost:hover{border-color:var(--red);background:rgba(163,50,42,.06)}
+  .timer{display:flex;align-items:center;gap:10px;cursor:pointer;background:none;border:0;color:var(--ink);font-weight:700}
   .timer svg{width:54px;height:54px;transform:rotate(-90deg)}
-  .timer .t{font-size:15px}
-  .timer .t small{display:block;font-style:italic;font-weight:600;opacity:.6;font-size:12px}
-  .timer.low circle.p{stroke:#e2574c}
+  .timer .t{font-size:15px;text-align:left}
+  .timer .t small{display:block;font-style:italic;font-weight:400;color:var(--ink-2);font-size:12px}
 
-  .ctag{display:inline-flex;align-items:center;gap:8px;font:800 12px 'Nunito';letter-spacing:.14em;text-transform:uppercase;
-    color:var(--cream);background:rgba(255,255,255,.08);border:1px solid var(--line);padding:5px 12px 5px 6px;border-radius:999px}
-  .ctag i{width:22px;height:14px;border-radius:3px;display:block}
-  .ctag.it i{background:linear-gradient(90deg,#009246 33.3%,#f4f4f4 33.3% 66.6%,#ce2b37 66.6%)}
-  .ctag.gr i{background:repeating-linear-gradient(180deg,#0d5eaf 0 1.56px,#fff 1.56px 3.11px)}
-  .reveal-num{font-family:'Pacifico';font-size:clamp(64px,12vw,120px);color:var(--gold);text-align:center;line-height:1.1;
-    text-shadow:0 4px 0 #7a2a22,0 0 40px rgba(242,193,78,.35)}
-  .reveal-unit{text-align:center;font-weight:800;opacity:.75;margin-top:-4px}
-  .fact{margin:20px auto 6px;max-width:720px;text-align:center;font-size:17px;line-height:1.45}
-  .fact .en{font-size:15px;margin-top:6px}
-  .line{position:relative;margin:30px 0 8px;padding:0 4px}
-  .lane{position:relative;height:44px;border-bottom:1px dashed rgba(246,236,217,.12)}
-  .lane .track{position:absolute;left:0;right:0;top:50%;height:2px;background:rgba(246,236,217,.12)}
-  .lane .pin{position:absolute;top:50%;transform:translate(-50%,-50%);display:flex;align-items:center;gap:6px;white-space:nowrap;
-    transition:left 1s cubic-bezier(.3,1.2,.4,1)}
-  .lane .pin .d{width:32px;height:32px;border-radius:50%;background:var(--c);display:grid;place-items:center;font:900 14px 'Nunito';color:#fff;box-shadow:0 4px 10px rgba(0,0,0,.3)}
-  .lane .pin .v{font-weight:900;font-size:14px;background:rgba(0,0,0,.35);padding:2px 8px;border-radius:8px}
+  .reveal-num{font-family:'Oranienbaum',serif;font-size:clamp(76px,13vw,136px);color:var(--red);text-align:center;line-height:1.05;margin-top:6px}
+  .reveal-unit{text-align:center;color:var(--ink-2);font-weight:700}
+  .verdict{text-align:center;font-family:'Marck Script',cursive;font-size:clamp(28px,3.4vw,36px);color:var(--red);margin-top:10px;line-height:1.2}
+  .verdict .en{font-family:'PT Sans';font-size:15px;color:var(--ink-2);opacity:1}
+  .fact{margin:22px auto 6px;max-width:720px;text-align:center;font-size:17px;line-height:1.5;color:var(--ink)}
+  .fact .en{font-size:15px;color:var(--ink-2);opacity:1;margin-top:6px}
+  .line{position:relative;margin:34px 0 8px;padding:0 4px}
+  .lane{position:relative;height:46px;border-bottom:1px dashed rgba(42,28,22,.12)}
+  .lane .track{position:absolute;left:0;right:0;top:50%;height:1px;background:rgba(42,28,22,.2)}
+  .lane .pin{position:absolute;top:50%;display:flex;align-items:center;gap:6px;white-space:nowrap;transition:left 1s cubic-bezier(.3,1.2,.4,1)}
+  .lane .pin .d{width:32px;height:32px;font-size:16px}
+  .lane .pin .v{font-weight:700;font-size:14px;background:var(--ink);color:var(--paper);padding:2px 8px;border-radius:4px}
   .lane .pin.flip{flex-direction:row-reverse;transform:translate(calc(-100% + 16px),-50%)}
   .lane .pin:not(.flip){transform:translate(-16px,-50%)}
-  .lane.win .pin .d{box-shadow:0 0 0 4px var(--gold),0 0 22px rgba(242,193,78,.7)}
-  .truth{position:absolute;top:-18px;bottom:-6px;width:3px;background:var(--gold);transform:translateX(-50%);border-radius:3px;
-    box-shadow:0 0 14px rgba(242,193,78,.8);transition:left 1s}
-  .truth::before{content:"★";position:absolute;top:-20px;left:50%;transform:translateX(-50%);color:var(--gold);font-size:18px}
-  .results{display:grid;gap:8px;margin:20px 0}
-  .res{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:16px;background:rgba(0,0,0,.16);font-weight:800}
-  .res .d{width:32px;height:32px;border-radius:50%;background:var(--c);display:grid;place-items:center;font:900 14px 'Nunito';color:#fff;flex:none}
+  .lane.win .pin .d{box-shadow:0 0 0 3px var(--paper),0 0 0 5px var(--gold),0 0 18px rgba(189,145,82,.8)}
+  .truth{position:absolute;top:-18px;bottom:-6px;width:2px;background:var(--gold-d);transform:translateX(-50%);transition:left 1s}
+  .truth::before{content:"";position:absolute;top:-16px;left:50%;width:16px;height:16px;transform:translateX(-50%);
+    background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M10 0l2.9 6.6 7.1.6-5.4 4.7 1.6 7-6.2-3.7-6.2 3.7 1.6-7L0 7.2l7.1-.6z' fill='%23a3322a' stroke='%239a7038'/%3E%3C/svg%3E") center/contain no-repeat}
+  .results{display:grid;gap:8px;margin:22px 0}
+  .res{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:8px;background:rgba(42,28,22,.05);font-weight:700;color:var(--ink)}
+  .res .d{width:32px;height:32px;font-size:16px;flex:none}
   .res .nm{flex:1}
-  .res .diff{opacity:.7;font-weight:600;font-size:14px}
-  .res .pts{color:var(--gold);font-size:18px;min-width:44px;text-align:right}
-  .res.win{background:rgba(242,193,78,.14);box-shadow:inset 0 0 0 1.5px rgba(242,193,78,.5)}
-  .verdict{text-align:center;font-weight:900;font-size:22px;margin-top:6px}
-  .verdict .en{font-size:15px}
+  .res .diff{color:var(--ink-2);font-weight:400;font-size:14px}
+  .res .pts{font-family:'Oranienbaum';color:var(--red);font-size:24px;font-weight:400;min-width:44px;text-align:right}
+  .res.win{background:rgba(189,145,82,.22);box-shadow:inset 0 0 0 1px rgba(154,112,56,.6)}
+  #restList .res{background:rgba(24,30,30,.65);color:var(--cream);border:1px solid var(--line)}
+  #restList .res .pts{color:var(--gold-l)}
 
-  .rules{display:grid;gap:12px;margin:22px 0;font-size:17px;line-height:1.4}
-  .rules li{list-style:none;display:flex;gap:12px;align-items:flex-start;background:rgba(0,0,0,.15);padding:12px 16px;border-radius:16px}
-  .rules li b.n{color:var(--gold);font-family:'Pacifico';font-size:22px;line-height:1}
-  .rules .en{font-size:14px}
-  .seg{display:inline-flex;background:rgba(0,0,0,.2);border-radius:999px;padding:4px;gap:4px}
-  .seg button{border:0;background:none;color:var(--cream);font-weight:800;font-size:16px;padding:8px 16px;border-radius:999px;cursor:pointer}
-  .seg button.on{background:var(--gold);color:var(--ink)}
+  .rules{display:grid;gap:10px;margin:22px 0;font-size:17px;line-height:1.4}
+  .rules li{list-style:none;display:flex;gap:14px;align-items:flex-start;padding:12px 16px;border-radius:8px;background:rgba(42,28,22,.05)}
+  .rules li b.n{color:var(--red);font-family:'Marck Script';font-size:28px;line-height:.9;font-weight:400}
+  .rules .en{font-size:14px;color:var(--ink-2)}
+  .qcard h2{color:var(--ink);text-align:left}
+  .qcard h2 .en{color:var(--red)}
+  .qcard .label{color:var(--ink)}
+  .seg{display:inline-flex;background:rgba(42,28,22,.08);border-radius:999px;padding:4px;gap:4px;flex-wrap:wrap;justify-content:center}
+  .seg button{border:0;background:none;color:var(--ink);font-weight:700;font-size:15px;padding:8px 16px;border-radius:999px;cursor:pointer}
+  .seg button.on{background:var(--red);color:var(--cream)}
+  .ctag{display:inline-flex;align-items:center;gap:8px;font:700 11.5px 'PT Sans';letter-spacing:.16em;text-transform:uppercase;
+    color:var(--ink);border:1px solid rgba(42,28,22,.25);padding:4px 11px 4px 5px;border-radius:999px}
+  .ctag i{width:22px;height:14px;border-radius:2px;display:block}
+  .ctag.it i{background:linear-gradient(90deg,#009246 33.3%,#f4f4f4 33.3% 66.6%,#ce2b37 66.6%)}
+  .ctag.gr i{background:repeating-linear-gradient(180deg,#0d5eaf 0 1.56px,#fff 1.56px 3.11px)}
 
   /* ---------- final ---------- */
-  .podium{display:flex;align-items:flex-end;justify-content:center;gap:14px;margin:40px 0 20px;min-height:260px}
+  .podium{display:flex;align-items:flex-end;justify-content:center;gap:16px;margin:44px 0 20px;min-height:270px}
   .step{display:flex;flex-direction:column;align-items:center;gap:8px;width:min(180px,28vw)}
-  .step .d{width:70px;height:70px;border-radius:50%;background:var(--c);display:grid;place-items:center;font:900 30px 'Nunito';color:#fff;box-shadow:0 8px 20px rgba(0,0,0,.3)}
-  .step .nm{font-weight:900;text-align:center;font-size:17px}
-  .step .block{width:100%;border-radius:18px 18px 6px 6px;display:grid;place-items:center;font-family:'Pacifico';font-size:34px;color:var(--ink);
-    animation:grow .9s cubic-bezier(.3,1.3,.4,1) both}
+  .step .d{width:72px;height:72px;font-size:36px}
+  .step .nm{font-weight:700;text-align:center;font-size:17px}
+  .step .place{font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold-l);font-weight:700}
+  .step .block{width:100%;border-radius:6px 6px 2px 2px;display:grid;place-items:center;font-family:'Oranienbaum';font-size:40px;color:var(--ink);
+    box-shadow:inset 0 0 0 6px transparent, inset 0 0 0 7px rgba(42,28,22,.25), 0 20px 40px rgba(0,0,0,.4);animation:grow .9s cubic-bezier(.3,1.3,.4,1) both}
   @keyframes grow{from{transform:scaleY(0);transform-origin:bottom}to{transform:scaleY(1);transform-origin:bottom}}
   .rest{max-width:520px;margin:0 auto}
 
+  /* toast */
+  .toast{position:fixed;left:50%;top:70px;transform:translate(-50%,-10px);z-index:30;padding:8px 16px;border-radius:999px;
+    background:rgba(24,30,30,.85);border:1px solid var(--gold);color:var(--cream);font-size:14px;opacity:0;transition:.3s;pointer-events:none}
+  .toast.show{opacity:1;transform:translate(-50%,0)}
+
   @media (max-width:700px){
-    .screen{padding:58px 12px 150px}
+    .screen{padding:70px 12px 130px}
     .bubble{max-width:200px;font-size:14px}
     body.corner .bubble{top:auto;bottom:100%;left:4px}
-    .answers{grid-template-columns:1fr 1fr;gap:10px}
-    .ans input{font-size:26px}
-    .qactions{justify-content:center}
     body.corner .bubble::after{left:30px}
+    .answers{grid-template-columns:1fr 1fr;gap:10px}
+    .ans input{font-size:30px}
+    .qactions{justify-content:center}
+    .countdown .cell{width:54px}.countdown .num{font-size:30px}
+    #scr-home{padding-bottom:150px}
+    body:not(.corner) .bubble{left:auto;right:-6px;top:-12%}
+    body:not(.corner) .bubble::after{left:auto;right:24px}
+    [data-k=glass2]{display:none}
+    [data-k=bottle]{right:30%!important}
+    .hint{font-size:12.5px}
+    body.corner .orn{display:none}
+    body.corner [data-k=bottle]{display:none}
   }
-  @media (max-height:640px){#scr-home .eyebrow{display:none}#scr-home h1{font-size:36px}#goatSlot{height:44vh}}
+  @media (max-height:760px){#scr-home{padding-top:70px}#scr-home .eyebrow{display:none}#scr-home h1{font-size:46px}#goatSlot{height:30vh}.countdown{margin:6px 0 0}}
+  .lights .tin{animation:tin 2.4s ease-in-out infinite}
+  @keyframes tin{50%{opacity:.35}}
 </style>
 </head>
 <body>
+<div class="room"></div>
 <canvas id="snow"></canvas>
-<svg class="garland" viewBox="0 0 1000 60" preserveAspectRatio="none" id="garland"></svg>
+<svg class="lights" id="lights" aria-label="Гирлянда — нажми, чтобы сменить режим"></svg>
+<div class="toast" id="toast"></div>
 
 <!-- ================= HOME ================= -->
 <section class="screen active" id="scr-home">
-  <div class="eyebrow">Семейная новогодняя игра · 2027</div>
-  <h1>Ёлки-<span>козёлки!</span></h1>
+  <div class="eyebrow">Семейная новогодняя игра</div>
+  <h1>Ёлки-козёлки!</h1>
+  <div class="cd-title" id="cdTitle">До Нового года <i>· until New Year</i></div>
+  <div class="countdown" id="countdown">
+    <div class="cell paper"><div class="num" id="cdD">0</div><div class="lbl">дней<br>days</div></div><div class="sep">:</div>
+    <div class="cell paper"><div class="num" id="cdH">00</div><div class="lbl">часов<br>hours</div></div><div class="sep">:</div>
+    <div class="cell paper"><div class="num" id="cdM">00</div><div class="lbl">минут<br>min</div></div><div class="sep">:</div>
+    <div class="cell paper"><div class="num" id="cdS">00</div><div class="lbl">секунд<br>sec</div></div>
+  </div>
   <div id="goatSlot"></div>
   <div class="actions">
     <button class="btn" id="start">Начать игру<small>Let's play</small></button>
-    <button class="icon-btn" id="sound" title="Звук / Sound" aria-label="Включить звук"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M17 9l4 6M21 9l-4 6"/></svg></button>
+    <button class="icon-btn" id="sound" title="Звук / Sound" aria-label="Выключить звук"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg></button>
   </div>
-  <div class="hint">Погладь козочку — она любит внимание · <i>Pet the goat, she loves attention</i></div>
+  <div class="hint">Погладь козочку, открой шампанское, позвони Деду Морозу или нажми на гирлянду<span class="en">Pet the goat, pop the champagne, call Ded Moroz or tap the garland</span></div>
 </section>
 
 <!-- ================= TEAMS ================= -->
@@ -258,6 +335,7 @@
   <div class="topbar"><button class="ghost" data-go="home">← Назад<small>Back</small></button></div>
   <div class="wrap">
     <h2>Собираем команды<span class="en">Let's make teams</span></h2>
+    <div class="divider"></div>
     <div class="stepper">
       <button id="minus" aria-label="Меньше команд">−</button>
       <div class="count" id="count">2</div>
@@ -277,16 +355,17 @@
   </div>
   <div class="wrap">
     <h2>Выбираем раунд<span class="en">Choose a round</span></h2>
+    <div class="divider"></div>
     <div class="scores" id="menuScores" style="margin-top:18px"></div>
     <div class="rounds">
-      <button class="round" id="openClosest">
+      <button class="round paper" id="openClosest">
         <span class="tag" id="closestTag">Играем</span>
         <div class="emo"><svg viewBox="0 0 48 48" width="44" height="44" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="24" cy="24" r="18"/><circle cx="24" cy="24" r="11"/><circle cx="24" cy="24" r="4" fill="currentColor"/></svg></div>
         <h3>Кто ближе?</h3>
         <p>Ответ — всегда число. Побеждает команда, которая назовёт самое близкое. Есть вопросы про Италию и Грецию.<span class="en" style="font-size:13px">Closest wins: every answer is a number — the nearest guess scores.</span></p>
       </button>
-      <div class="round soon"><span class="tag">Скоро</span><div class="emo"><svg viewBox="0 0 48 48" width="44" height="44" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 34V10l20-4v24"/><circle cx="13" cy="34" r="5"/><circle cx="33" cy="30" r="5"/></svg></div><h3>Угадай мелодию</h3><p>Новогодние песни с первых нот.<span class="en" style="font-size:13px">Name that tune · coming soon</span></p></div>
-      <div class="round soon"><span class="tag">Скоро</span><div class="emo"><svg viewBox="0 0 48 48" width="44" height="44" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="6" y="6" width="36" height="36" rx="10"/><path d="M19 19a5 5 0 1 1 7 4.6c-1.3.6-2 1.6-2 3V28"/><circle cx="24" cy="34" r="1.2" fill="currentColor"/></svg></div><h3>Викторина</h3><p>Вопросы с вариантами ответа.<span class="en" style="font-size:13px">Multiple-choice quiz · coming soon</span></p></div>
+      <div class="round paper soon"><span class="tag">Скоро</span><div class="emo"><svg viewBox="0 0 48 48" width="44" height="44" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 34V10l20-4v24"/><circle cx="13" cy="34" r="5"/><circle cx="33" cy="30" r="5"/></svg></div><h3>Угадай мелодию</h3><p>Новогодние песни с первых нот.<span class="en" style="font-size:13px">Name that tune · coming soon</span></p></div>
+      <div class="round paper soon"><span class="tag">Скоро</span><div class="emo"><svg viewBox="0 0 48 48" width="44" height="44" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="6" y="6" width="36" height="36" rx="10"/><path d="M19 19a5 5 0 1 1 7 4.6c-1.3.6-2 1.6-2 3V28"/><circle cx="24" cy="34" r="1.2" fill="currentColor"/></svg></div><h3>Викторина</h3><p>Вопросы с вариантами ответа.<span class="en" style="font-size:13px">Multiple-choice quiz · coming soon</span></p></div>
     </div>
   </div>
 </section>
@@ -305,6 +384,7 @@
   <div class="topbar"><button class="ghost" data-go="menu">← Раунды<small>Rounds</small></button></div>
   <div class="wrap">
     <h2>Итоги вечера<span class="en">Tonight's results</span></h2>
+    <div class="divider"></div>
     <div class="podium" id="podium"></div>
     <div class="results rest" id="restList"></div>
     <div class="center" style="margin-top:18px">
@@ -454,20 +534,15 @@
             <circle cx="198" cy="118" r="1.8"/><circle cx="216" cy="78" r="1.6"/><circle cx="186" cy="106" r="1.6"/><circle cx="236" cy="128" r="1.6"/>
           </g>
           <path class="star" d="M200 12 l6.5 13.5 l14.8 1.9 l-10.8 10.3 l2.7 14.7 l-13.2 -7.2 l-13.2 7.2 l2.7 -14.7 l-10.8 -10.3 l14.8 -1.9z"
-                fill="#f6c443" stroke="#a06a12" stroke-width="2.5" stroke-linejoin="round"/>
+                fill="#c8352b" stroke="#e8c784" stroke-width="2.5" stroke-linejoin="round"/>
         </g>
       </g>
     </svg>
 </div>
 
 <canvas id="confetti"></canvas>
-<svg class="drift" viewBox="0 0 1000 80" preserveAspectRatio="none">
-  <path d="M0 52 C110 34 230 66 360 50 S600 30 720 50 S900 40 1000 48 V80 H0Z" fill="#fbfdff"/>
-  <g fill="#cfe0ec">
-    <circle cx="80" cy="62" r="1.4"/><circle cx="210" cy="66" r="1.2"/><circle cx="330" cy="60" r="1.4"/><circle cx="470" cy="64" r="1.2"/>
-    <circle cx="590" cy="58" r="1.4"/><circle cx="700" cy="63" r="1.2"/><circle cx="820" cy="60" r="1.4"/><circle cx="940" cy="64" r="1.2"/>
-  </g>
-</svg>
+<div class="table" id="table"><div class="cloth"></div></div>
+<div class="grain"></div>
 
 <script>
 const NS = 'http://www.w3.org/2000/svg';
@@ -595,7 +670,7 @@ svg.addEventListener('pointerleave', () => svg.classList.remove('excited'));
 /* =====================================================================
    SOUND
    ===================================================================== */
-let audio = null, soundOn = false;
+let audio = null, soundOn = true;
 const ICON_ON = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg>', ICON_OFF = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M17 9l4 6M21 9l-4 6"/></svg>';
 function ctx() { if (!audio) { try { audio = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} } return audio; }
 function bell(freq, when = 0, dur = .9, vol = .18) {
@@ -625,12 +700,13 @@ $('#sound').addEventListener('click', e => {
 /* =====================================================================
    STATE
    ===================================================================== */
-const COLORS = ['#e2574c', '#f2c14e', '#5ec27a', '#5aa6d6', '#f29ac0', '#a98be0', '#f08a3c', '#4fc1b6'];
+const COLORS = ['#a3322a', '#bd9152', '#3f7a52', '#2f5d8a', '#7a3b5e', '#c0662b', '#3d7f86', '#6b4a32'];
 const EMOJI = ['','','','','','','','','','','','','','','',''];
 const NAMES = ['Мандаринки','Снеговики','Оленята','Подарочки','Пряники','Носочки','Хлопушки','Шишки','Бенгальские огни',
   'Оливьешки','Сосульки','Снежинки','Колокольчики','Ёлочки','Шампанчики','Дед Морозы','Снегурочки','Варежки','Пельмешки','Гирлянды'];
 let state = load() || { teams: [], closest: null };
 if (!state.teams.length) setTeamCount(2);
+state.teams.forEach((t, i) => { if (!COLORS.includes(t.color)) t.color = COLORS[i % COLORS.length]; });
 function save() { try { localStorage.setItem('elki-kozelki', JSON.stringify(state)); } catch (e) {} }
 function load() { try { return JSON.parse(localStorage.getItem('elki-kozelki')); } catch (e) { return null; } }
 const ini = t => (String(t.name).trim()[0] || '?').toUpperCase();
@@ -659,7 +735,7 @@ $('#start').addEventListener('click', () => { hop(); say('Ура! Собирае
 
 function renderScores(box, bumpIds = []) {
   box.innerHTML = state.teams.map((t, i) =>
-    `<div class="chip ${bumpIds.includes(i) ? 'bump' : ''}" style="--c:${t.color}"><span class="dot">${ini(t)}</span>${esc(t.name)} <b>${t.score}</b></div>`).join('');
+    `<div class="chip ${bumpIds.includes(i) ? 'bump' : ''}" style="--c:${t.color}"><span class="dot ball">${ini(t)}</span>${esc(t.name)} <b>${t.score}</b></div>`).join('');
 }
 
 /* =====================================================================
@@ -671,8 +747,8 @@ function renderTeams() {
   $('#plus').disabled = state.teams.length >= 8;
   const list = $('#teamList');
   list.innerHTML = state.teams.map((t, i) => `
-    <div class="team" style="--c:${t.color};animation-delay:${i * .05}s">
-      <button class="avatar" data-i="${i}" title="Сменить цвет / Change colour">${ini(t)}</button>
+    <div class="team paper" style="--c:${t.color};animation-delay:${i * .05}s">
+      <button class="avatar ball cap" data-i="${i}" title="Сменить цвет / Change colour">${ini(t)}</button>
       <div class="fields">
         <div class="num">Команда ${i + 1} · Team ${i + 1}</div>
         <input value="${esc(t.name)}" data-i="${i}" maxlength="24" aria-label="Название команды ${i + 1}">
@@ -801,7 +877,7 @@ const FLAG = { it: '<span class="ctag it"><i></i>Italia</span>', gr: '<span clas
 const shuffle = a => a.map(v => [Math.random(), v]).sort((x, y) => x[0] - y[0]).map(x => x[1]);
 function renderIntro(body) {
   body.innerHTML = `
-  <div class="qcard">
+  <div class="qcard paper">
     <h2 style="text-align:left;margin-top:6px">Кто ближе?<span class="en">Closest wins</span></h2>
     <ul class="rules">
       <li><b class="n">1</b><div>Козочка задаёт вопрос — ответ на него всегда число.<span class="en">The Goat asks a question — the answer is always a number.</span></div></li>
@@ -848,7 +924,7 @@ function renderIntro(body) {
 function renderQuestion(body, q) {
   const c = state.closest;
   body.innerHTML = `
-  <div class="qcard">
+  <div class="qcard paper">
     <div class="qmeta"><span>Вопрос ${c.idx + 1} из ${c.order.length} · Question ${c.idx + 1}/${c.order.length}</span><span style="font-size:20px">${q.t ? FLAG[q.t] : ''}</span></div>
     <div class="progress"><i style="width:${(c.idx / c.order.length) * 100}%"></i></div>
     <div class="qru">${esc(q.ru)}</div>
@@ -856,7 +932,7 @@ function renderQuestion(body, q) {
     <div class="answers">
       ${state.teams.map((t, i) => `
         <label class="ans" style="--c:${t.color}">
-          <div class="who"><span class="d">${ini(t)}</span>${esc(t.name)}</div>
+          <div class="who"><span class="d ball">${ini(t)}</span>${esc(t.name)}</div>
           <input type="text" inputmode="decimal" placeholder="?" data-i="${i}" value="${c.guesses[i] ?? ''}" autocomplete="off">
         </label>`).join('')}
     </div>
@@ -933,7 +1009,7 @@ function renderReveal(body, q) {
     : [`Ближе всех — ${names}! +1`, `Closest: ${names}! +1`];
 
   body.innerHTML = `
-  <div class="qcard">
+  <div class="qcard paper">
     <div class="qmeta"><span>Вопрос ${c.idx + 1} из ${c.order.length} · Question ${c.idx + 1}/${c.order.length}</span><span style="font-size:20px">${q.t ? FLAG[q.t] : ''}</span></div>
     <div class="progress"><i style="width:${((c.idx + 1) / c.order.length) * 100}%"></i></div>
     <div class="qen" style="margin-top:0;text-align:center">${esc(q.ru)}<br>${esc(q.en)}</div>
@@ -943,11 +1019,11 @@ function renderReveal(body, q) {
     <div class="line">
       <div class="truth" id="truth" style="left:${pos(q.a)}%"></div>
       ${rows.map(r => `<div class="lane ${r.win ? 'win' : ''}" style="--c:${r.t.color}"><div class="track"></div>
-        ${r.g === null ? '' : `<div class="pin ${pos(r.g) > 72 ? 'flip' : ''}" style="left:${pos(q.a)}%" data-to="${pos(r.g)}"><span class="d">${ini(r.t)}</span><span class="v">${fmt(r.g)}</span></div>`}</div>`).join('')}
+        ${r.g === null ? '' : `<div class="pin ${pos(r.g) > 72 ? 'flip' : ''}" style="left:${pos(q.a)}%" data-to="${pos(r.g)}"><span class="d ball">${ini(r.t)}</span><span class="v">${fmt(r.g)}</span></div>`}</div>`).join('')}
     </div>
     <div class="results">
       ${sorted.map(r => `<div class="res ${r.win ? 'win' : ''}" style="--c:${r.t.color}">
-        <span class="d">${ini(r.t)}</span><span class="nm">${esc(r.t.name)}</span>
+        <span class="d ball">${ini(r.t)}</span><span class="nm">${esc(r.t.name)}</span>
         <span class="diff">${r.g === null ? 'нет ответа · no answer' : `${fmt(r.g)} · ${r.d === 0 ? ' точно · exact' : '±' + fmt(r.d)}`}</span>
         <span class="pts">${r.pts ? '+' + r.pts : ''}</span></div>`).join('')}
     </div>
@@ -981,10 +1057,10 @@ function nextQuestion() {
 function renderRoundEnd(body) {
   const ranked = [...state.teams].sort((a, b) => b.score - a.score);
   body.innerHTML = `
-  <div class="qcard" style="text-align:center">
+  <div class="qcard paper" style="text-align:center">
     <h2>Раунд окончен!<span class="en">Round complete!</span></h2>
     <div class="results rest" style="margin-top:22px">
-      ${ranked.map((t, k) => `<div class="res ${k === 0 ? 'win' : ''}" style="--c:${t.color}"><span class="d">${ini(t)}</span><span class="nm" style="text-align:left">${esc(t.name)}</span><span class="pts">${t.score}</span></div>`).join('')}
+      ${ranked.map((t, k) => `<div class="res ${k === 0 ? 'win' : ''}" style="--c:${t.color}"><span class="d ball">${ini(t)}</span><span class="nm" style="text-align:left">${esc(t.name)}</span><span class="pts">${t.score}</span></div>`).join('')}
     </div>
     <div class="center" style="margin-top:16px">
       <button class="ghost" id="again">Сыграть ещё раз<small>Play again</small></button>
@@ -1001,14 +1077,14 @@ function renderRoundEnd(body) {
 function renderFinal() {
   const ranked = [...state.teams].sort((a, b) => b.score - a.score);
   const top = ranked.slice(0, 3), order = [top[1], top[0], top[2]].filter(Boolean);
-  const hts = { 0: 170, 1: 120, 2: 90 }, medal = ['1 место · 1st', '2 место · 2nd', '3 место · 3rd'], bg = ['#f2c14e', '#d9dde3', '#e0a46a'];
+  const hts = { 0: 170, 1: 120, 2: 90 }, medal = ['1 место · 1st', '2 место · 2nd', '3 место · 3rd'], bg = ['linear-gradient(#e2c17e,#b98f4c)', 'linear-gradient(#e4ded2,#b9b2a4)', 'linear-gradient(#d29a68,#9c6a40)'];
   $('#podium').innerHTML = order.map(t => {
     const k = ranked.indexOf(t);
-    return `<div class="step" style="--c:${t.color}"><div style="font-weight:800;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold)">${medal[k]}</div><div class="d">${ini(t)}</div>
+    return `<div class="step" style="--c:${t.color}"><div class="place">${medal[k]}</div><div class="d ball cap">${ini(t)}</div>
       <div class="nm">${esc(t.name)}</div><div class="block" style="height:${hts[k]}px;background:${bg[k]};animation-delay:${.2 + (2 - k) * .25}s">${t.score}</div></div>`;
   }).join('');
   $('#restList').innerHTML = ranked.slice(3).map((t, k) =>
-    `<div class="res" style="--c:${t.color}"><span class="d">${ini(t)}</span><span class="nm">${k + 4}. ${esc(t.name)}</span><span class="pts">${t.score}</span></div>`).join('');
+    `<div class="res" style="--c:${t.color}"><span class="d ball">${ini(t)}</span><span class="nm">${k + 4}. ${esc(t.name)}</span><span class="pts">${t.score}</span></div>`).join('');
   setTimeout(() => { confetti(260); fanfare(); hop(); say(`Победа: ${ranked[0].name}!`, `${ranked[0].name} win!`, 5000); }, 900);
 }
 $('#newGame').onclick = () => { state.teams.forEach(t => t.score = 0); state.closest = null; save(); go('teams'); };
@@ -1016,24 +1092,13 @@ $('#newGame').onclick = () => { state.teams.forEach(t => t.score = 0); state.clo
 /* =====================================================================
    DECOR: garland, snow, confetti
    ===================================================================== */
-(() => {
-  const g = $('#garland');
-  const p = el('path', { d: 'M0 8 Q125 44 250 8 T500 8 T750 8 T1000 8', stroke: '#2b1a12', 'stroke-width': 2, fill: 'none' }, g), L = p.getTotalLength();
-  const colors = ['#f2c14e', '#d1453b', '#5ec27a', '#5aa6d6', '#f29ac0'];
-  for (let i = 0, s = 20; s < L; s += 46, i++) {
-    const pt = p.getPointAtLength(s);
-    el('rect', { x: pt.x - 3, y: pt.y - 1, width: 6, height: 5, fill: '#3a2a20' }, g);
-    const b = el('ellipse', { cx: pt.x, cy: pt.y + 10, rx: 5, ry: 8, fill: colors[i % colors.length], class: 'bulb' }, g);
-    b.style.animationDelay = (i % 5) * .3 + 's';
-  }
-})();
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 (() => {
   const c = $('#snow'), x = c.getContext('2d'); let W, H, flakes = [];
   function size() {
     const dpr = Math.min(devicePixelRatio || 1, 2); W = innerWidth; H = innerHeight;
     c.width = W * dpr; c.height = H * dpr; x.setTransform(dpr, 0, 0, dpr, 0, 0);
-    flakes = Array.from({ length: Math.round(W * H / 9000) }, () => ({ x: Math.random() * W, y: Math.random() * H, r: Math.random() * 2.4 + .6, s: Math.random() * .6 + .25, w: Math.random() * 6.28 }));
+    flakes = Array.from({ length: Math.round(W * H / 16000) }, () => ({ x: Math.random() * W, y: Math.random() * H, r: Math.random() * 2.4 + .6, s: Math.random() * .6 + .25, w: Math.random() * 6.28 }));
   }
   size(); addEventListener('resize', size);
   (function loop() {
@@ -1041,14 +1106,14 @@ const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
     for (const f of flakes) {
       if (!reduceMotion) { f.y += f.s * f.r * .6; f.w += .01; f.x += Math.sin(f.w) * .35; }
       if (f.y > H + 5) { f.y = -5; f.x = Math.random() * W; }
-      x.globalAlpha = .3 + f.r / 4.5; x.beginPath(); x.arc(f.x, f.y, f.r, 0, 6.283); x.fill();
+      x.globalAlpha = .15 + f.r / 7; x.beginPath(); x.arc(f.x, f.y, f.r, 0, 6.283); x.fill();
     }
     x.globalAlpha = 1; requestAnimationFrame(loop);
   })();
 })();
 const confetti = (() => {
   const c = $('#confetti'), x = c.getContext('2d'); let parts = [], running = false;
-  const cols = ['#f2c14e', '#e2574c', '#5ec27a', '#5aa6d6', '#f29ac0', '#fff'];
+  const cols = ['#bd9152', '#e2c17e', '#a3322a', '#f0e3c7', '#3f7a52', '#2f5d8a'];
   function loop() {
     const W = c.width = innerWidth, H = c.height = innerHeight; x.clearRect(0, 0, W, H);
     parts = parts.filter(p => p.y < H + 20);
@@ -1067,6 +1132,248 @@ const confetti = (() => {
     }
     if (!running) { running = true; loop(); }
   };
+})();
+
+/* =====================================================================
+   SOVIET NEW YEAR DECOR (garland, tinsel, ornaments, table, countdown)
+   ===================================================================== */
+const toastEl = $('#toast');
+let toastT;
+function toast(text) { toastEl.textContent = text; toastEl.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => toastEl.classList.remove('show'), 1800); }
+
+/* ---------- extra sounds ---------- */
+function noiseBurst(dur = .09, freq = 1400, vol = .35) {
+  const a = ctx(); if (!a || !soundOn) return;
+  const len = a.sampleRate * dur, buf = a.createBuffer(1, len, a.sampleRate), d = buf.getChannelData(0);
+  for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3);
+  const s = a.createBufferSource(), f = a.createBiquadFilter(), g = a.createGain();
+  s.buffer = buf; f.type = 'bandpass'; f.frequency.value = freq; g.gain.value = vol;
+  s.connect(f).connect(g).connect(a.destination); s.start();
+}
+function thump() {
+  const a = ctx(); if (!a || !soundOn) return;
+  const o = a.createOscillator(), g = a.createGain(), t = a.currentTime;
+  o.frequency.setValueAtTime(180, t); o.frequency.exponentialRampToValueAtTime(60, t + .12);
+  g.gain.setValueAtTime(.4, t); g.gain.exponentialRampToValueAtTime(.001, t + .15);
+  o.connect(g).connect(a.destination); o.start(t); o.stop(t + .16);
+}
+const popSound = () => { thump(); noiseBurst(.1, 1800, .4); setTimeout(() => noiseBurst(.6, 5000, .05), 90); };
+const clink = () => { bell(2637, 0, 1.4, .1); bell(3951, .015, 1.1, .05); };
+const ring = () => { for (let k = 0; k < 2; k++) for (let i = 0; i < 14; i++) bell(i % 2 ? 1180 : 1100, k * 1 + i * .05, .1, .05); };
+
+/* ---------- garland with old-school modes ---------- */
+const lights = $('#lights');
+const BULB = ['#e2483d', '#f2b33d', '#4fa36b', '#4a86c8', '#e88bb0'];
+const MODES = [['Все огни', 'Steady'], ['Бегущий огонь', 'Chase'], ['Мигание', 'Blink'], ['Мерцание', 'Twinkle']];
+let lightMode = 1, bulbs = [], step = 0;
+function wireY(x, W) { const span = W / Math.max(3, Math.round(W / 260)); const t = (x % span) / span; return 4 + 24 * Math.sin(Math.PI * t); }
+function buildLights() {
+  const W = innerWidth; lights.setAttribute('viewBox', `0 0 ${W} 64`);
+  lights.innerHTML = `<defs>
+    <filter id="bulbGlow" x="-150%" y="-150%" width="400%" height="400%"><feGaussianBlur stdDeviation="3.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <linearGradient id="tinsel" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#f4f1e8"/><stop offset=".5" stop-color="#a9b3b8"/><stop offset="1" stop-color="#e8e2d0" stop-opacity="0"/></linearGradient></defs>`;
+  // tinsel ("дождик") hanging from the wire
+  let tin = '';
+  for (let x = 2; x < W; x += 5) {
+    const y = wireY(x, W), l = 10 + Math.random() * 30;
+    tin += `<path class="tin" d="M${x} ${y} q${(Math.random() - .5) * 4} ${l / 2} ${(Math.random() - .5) * 3} ${l}" style="animation-delay:${(Math.random() * 2.4).toFixed(2)}s"/>`;
+  }
+  let d = `M0 ${wireY(0, W)}`;
+  for (let x = 4; x <= W; x += 4) d += ` L${x} ${wireY(x, W).toFixed(1)}`;
+  let html = `<g fill="none" stroke="url(#tinsel)" stroke-width="1.2">${tin}</g><path d="${d}" fill="none" stroke="#1b2a20" stroke-width="2"/>`;
+  bulbs = [];
+  let i = 0;
+  for (let x = 20; x < W; x += 38, i++) {
+    const y = wireY(x, W), c = BULB[i % BULB.length];
+    html += `<g transform="translate(${x} ${y})"><rect x="-3" y="-1" width="6" height="6" rx="1" fill="#2d3b2a"/>
+      <path class="bulb" data-i="${i}" d="M0 4 C6 6 6 14 0 22 C-6 14 -6 6 0 4Z" fill="${c}"/>
+      <path d="M-1.5 8 q-1.5 4 0 8" stroke="rgba(255,255,255,.55)" stroke-width="1.2" fill="none"/></g>`;
+  }
+  lights.insertAdjacentHTML('beforeend', html);
+  bulbs = [...lights.querySelectorAll('.bulb')];
+}
+buildLights();
+addEventListener('resize', buildLights);
+setInterval(() => {
+  step++;
+  bulbs.forEach((b, i) => {
+    let on = true;
+    if (lightMode === 1) on = (i + step) % 4 !== 0 && (i + step) % 4 !== 1 ? false : true;
+    if (lightMode === 2) on = (i + Math.floor(step / 3)) % 2 === 0;
+    if (lightMode === 3) on = Math.random() > .3;
+    b.classList.toggle('on', on); b.classList.toggle('off', !on);
+  });
+}, 220);
+lights.addEventListener('click', () => {
+  lightMode = (lightMode + 1) % MODES.length;
+  toast(`Гирлянда: ${MODES[lightMode][0]} · ${MODES[lightMode][1]}`);
+  bell(880 + lightMode * 110, 0, .3, .08);
+});
+
+/* ---------- glass ornaments that swing ---------- */
+const CAP = (w = 12) => `<rect x="${-w / 2}" y="0" width="${w}" height="8" rx="1.5" fill="url(#gcap)"/><path d="M-3 0 q3 -6 6 0" stroke="#9a7038" stroke-width="1.4" fill="none"/>`;
+const ORN_DEFS = `<defs>
+  <linearGradient id="gcap" x1="0" x2="1"><stop offset="0" stop-color="#8a6230"/><stop offset=".5" stop-color="#f0d79a"/><stop offset="1" stop-color="#8a6230"/></linearGradient>
+  <radialGradient id="gRed" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#f08a7a"/><stop offset=".35" stop-color="#c13a2e"/><stop offset="1" stop-color="#4e1210"/></radialGradient>
+  <radialGradient id="gBlue" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#9cc6ee"/><stop offset=".35" stop-color="#2f6aa8"/><stop offset="1" stop-color="#0e2440"/></radialGradient>
+  <linearGradient id="gIce" x1="0" x2="1"><stop offset="0" stop-color="#7fa3b8"/><stop offset=".45" stop-color="#eef6fb"/><stop offset="1" stop-color="#6d8ea3"/></linearGradient>
+  <linearGradient id="gGold" x1="0" x2="1"><stop offset="0" stop-color="#7a5524"/><stop offset=".45" stop-color="#f0d08a"/><stop offset="1" stop-color="#8a6230"/></linearGradient>
+</defs>`;
+const ORN = {
+  red: { w: 60, h: 72, svg: `<g transform="translate(30 2)">${CAP(14)}<circle cx="0" cy="38" r="27" fill="url(#gRed)"/>
+      <path d="M-26 38 h52" stroke="#e8c784" stroke-width="2" stroke-dasharray="1 4" stroke-linecap="round"/>
+      <g stroke="#fff4dc" stroke-width="1.3" stroke-linecap="round" opacity=".9"><path d="M0 20 v12 M-5 26 h10 M-4 22 l8 8 M4 22 l-8 8"/></g>
+      <ellipse cx="-9" cy="27" rx="6" ry="9" fill="#fff" opacity=".35" transform="rotate(30 -9 27)"/></g>` },
+  blue: { w: 60, h: 72, svg: `<g transform="translate(30 2)">${CAP(14)}<circle cx="0" cy="38" r="26" fill="url(#gBlue)"/>
+      <g fill="#f3e6cb"><path d="M-10 32 l1.6 3.4 3.7.4-2.8 2.5.8 3.6-3.3-1.9-3.3 1.9.8-3.6-2.8-2.5 3.7-.4z"/><circle cx="9" cy="46" r="2"/><circle cx="12" cy="28" r="1.4"/><circle cx="-2" cy="54" r="1.4"/></g>
+      <ellipse cx="-9" cy="27" rx="6" ry="9" fill="#fff" opacity=".35" transform="rotate(30 -9 27)"/></g>` },
+  icicle: { w: 26, h: 110, svg: `<g transform="translate(13 2)">${CAP(8)}<path d="M-7 8 L7 8 L1 104 L-1 104Z" fill="url(#gIce)"/>
+      <g stroke="#ffffff" stroke-width="1" opacity=".7"><path d="M-6 18 L6 24 M-5 32 L5 38 M-4 46 L4 52 M-3 60 L3 66 M-2 74 L2 80 M-1 88 L1 92"/></g></g>` },
+  clock: { w: 64, h: 78, svg: `<g transform="translate(32 2)">${CAP(14)}<circle cx="0" cy="40" r="28" fill="#f4ead2" stroke="url(#gGold)" stroke-width="4"/>
+      <g stroke="#2a1c16" stroke-linecap="round">${Array.from({ length: 12 }, (_, k) => { const a = k * Math.PI / 6; return `<path d="M${(Math.sin(a) * 20).toFixed(1)} ${(40 - Math.cos(a) * 20).toFixed(1)} L${(Math.sin(a) * 23).toFixed(1)} ${(40 - Math.cos(a) * 23).toFixed(1)}" stroke-width="${k % 3 ? 1 : 2}"/>`; }).join('')}
+      <path d="M0 40 L-1 25" stroke-width="2.6"/><path d="M0 40 L-9 25" stroke-width="1.6" stroke="#a3322a"/></g>
+      <text x="0" y="28" font-family="Oranienbaum,serif" font-size="8" text-anchor="middle" fill="#2a1c16">XII</text>
+      <circle cx="0" cy="40" r="2" fill="#a3322a"/></g>` },
+  cone: { w: 40, h: 84, svg: `<g transform="translate(20 2)">${CAP(10)}<path d="M0 8 C14 14 16 44 0 80 C-16 44 -14 14 0 8Z" fill="url(#gGold)"/>
+      <g fill="none" stroke="#7a5524" stroke-width="1" opacity=".75">${Array.from({ length: 7 }, (_, r) => { const y = 18 + r * 9, w = 11 - Math.abs(r - 2.5) * 1.6; return `<path d="M${-w} ${y} q${w / 2} 6 ${w} 0 q${w / 2} 6 ${w} 0"/>`; }).join('')}</g></g>` },
+  lantern: { w: 40, h: 86, svg: `<g transform="translate(20 2)">${CAP(10)}<path d="M-14 12 h28 l-4 64 h-20z" fill="#a3322a"/>
+      <g fill="#e2b45c"><path d="M-9 12 h5 l-1 64 h-3z"/><path d="M4 12 h5 l-2 64 h-3z"/></g>
+      <path d="M-15 12 h30 M-11 76 h22" stroke="url(#gGold)" stroke-width="3"/><path d="M0 76 v8" stroke="#bd9152" stroke-width="2"/></g>` },
+};
+const ORN_LIST = [
+  { x: 3, len: 60, k: 'red' }, { x: 8.5, len: 26, k: 'icicle' }, { x: 13.8, len: 104, k: 'clock', inner: true },
+  { x: 86.2, len: 48, k: 'cone', inner: true }, { x: 91.5, len: 92, k: 'blue' }, { x: 97, len: 34, k: 'lantern' },
+];
+const PITCH = { red: 1568, blue: 1760, icicle: 2349, clock: 1318, cone: 1175, lantern: 1397 };
+const orns = ORN_LIST.map(o => {
+  const d = document.createElement('div'), def = ORN[o.k];
+  d.className = 'orn' + (o.inner ? ' inner' : '');
+  d.style.left = o.x + '%';
+  d.innerHTML = `<span class="str" style="height:${o.len + 4}px"></span>
+    <svg width="${def.w}" height="${def.h}" viewBox="0 0 ${def.w} ${def.h}" style="top:${o.len}px">${ORN_DEFS}${def.svg}</svg>`;
+  document.body.appendChild(d);
+  const s = { el: d, svg: d.querySelector('svg'), a: 0, v: 0, k: o.k, ph: Math.random() * 6 };
+  s.svg.addEventListener('click', () => {
+    s.v += (Math.random() < .5 ? -1 : 1) * 5; bell(PITCH[o.k], 0, 1.2, .12); bell(PITCH[o.k] * 1.5, .05, .9, .05);
+    if (o.k === 'clock') say('Без пяти двенадцать!', 'Five to midnight!');
+  });
+  return s;
+});
+let lastPX = null;
+addEventListener('pointermove', e => {
+  const vx = lastPX === null ? 0 : e.clientX - lastPX; lastPX = e.clientX;
+  for (const o of orns) {
+    const r = o.svg.getBoundingClientRect();
+    if (e.clientX > r.left - 14 && e.clientX < r.right + 14 && e.clientY > r.top - 10 && e.clientY < r.bottom + 10) o.v += vx * .06;
+  }
+});
+(function swing(t) {
+  const sc = innerWidth < 900 ? .8 : 1;
+  for (const o of orns) {
+    o.v += -0.025 * o.a + Math.sin(t / 1400 + o.ph) * .004; o.v *= .975; o.a += o.v;
+    o.a = Math.max(-35, Math.min(35, o.a));
+    o.el.style.transform = `rotate(${o.a.toFixed(2)}deg) scale(${sc})`;
+  }
+  requestAnimationFrame(swing);
+})(0);
+
+/* ---------- festive table ---------- */
+const THINGS = {
+  phone: { cls: 'tbl-left', pos: 'left:3%', w: 92, h: 66, svg: `
+    <path d="M14 62 L24 30 Q46 24 68 30 L78 62Z" fill="#b8352b"/><path d="M14 62 L78 62 L78 64 L14 64Z" fill="#7a221d"/>
+    <path d="M6 24 Q8 14 18 15 L74 15 Q84 14 86 24 Q86 30 78 30 L70 30 Q66 22 46 22 Q26 22 22 30 L14 30 Q6 30 6 24Z" fill="#c63d31"/>
+    <ellipse cx="46" cy="18" rx="22" ry="3" fill="#e46a5c" opacity=".55"/>
+    <circle cx="46" cy="47" r="13" fill="#f2e7cf" stroke="#7a221d" stroke-width="1.5"/>
+    <g fill="#2a1c16">${Array.from({ length: 10 }, (_, k) => { const a = -Math.PI * .75 + k * Math.PI * 1.5 / 9; return `<circle cx="${(46 + Math.cos(a) * 9).toFixed(1)}" cy="${(47 + Math.sin(a) * 9).toFixed(1)}" r="1.6"/>`; }).join('')}</g>
+    <circle cx="46" cy="47" r="4" fill="#b8352b"/>
+    <path d="M78 56 q8 0 8 6 q0 6 -6 6" stroke="#7a221d" stroke-width="2" fill="none"/>` },
+  salad: { cls: 'tbl-left opt', pos: 'left:12%', w: 96, h: 56, svg: `
+    <path d="M14 22 Q48 -6 82 22Z" fill="#efe1b3"/>
+    <g>${Array.from({ length: 26 }, (_, k) => { const x = 22 + (k * 37) % 54, y = 9 + (k * 13) % 12, c = ['#5f9a3e', '#e48a3a', '#f1d36b', '#f6efdc', '#c9b07a'][k % 5]; return `<rect x="${x}" y="${y}" width="4" height="4" rx="1" fill="${c}"/>`; }).join('')}</g>
+    <path d="M8 22 L88 22 L76 44 L20 44Z" fill="rgba(220,235,240,.55)" stroke="rgba(255,255,255,.8)" stroke-width="1.2"/>
+    <g stroke="rgba(255,255,255,.75)" stroke-width="1">${Array.from({ length: 8 }, (_, k) => `<path d="M${14 + k * 10} 22 l8 22 M${22 + k * 10} 22 l-8 22"/>`).join('')}</g>
+    <path d="M36 44 h24 v6 h-24z M28 50 h40 v4 h-40z" fill="rgba(220,235,240,.7)" stroke="rgba(255,255,255,.8)"/>` },
+  glass1: { cls: 'opt', pos: 'right:23%', w: 34, h: 82, svg: glassSVG() },
+  glass2: { cls: '', pos: 'right:19.5%', w: 34, h: 82, svg: glassSVG() },
+  bottle: { cls: '', pos: 'right:12%', w: 40, h: 120, svg: `
+    <path d="M14 34 L14 14 L26 14 L26 34 Q36 44 36 58 L36 112 Q36 118 30 118 L10 118 Q4 118 4 112 L4 58 Q4 44 14 34Z" fill="#163b26"/>
+    <path d="M8 60 L8 110" stroke="rgba(255,255,255,.18)" stroke-width="3" stroke-linecap="round"/>
+    <path class="foil" d="M13 4 L27 4 L27 36 Q20 40 13 36Z" fill="url(#bfoil)"/>
+    <g class="corkcap"><rect x="13" y="0" width="14" height="6" rx="2" fill="#c9a15e"/></g>
+    <rect x="7" y="70" width="26" height="30" rx="3" fill="#efe3c4" stroke="#bd9152" stroke-width="1.2"/>
+    <path d="M20 76 l2 4.4 4.8.5-3.6 3.2 1 4.7-4.2-2.4-4.2 2.4 1-4.7-3.6-3.2 4.8-.5z" fill="#a3322a"/>
+    <path d="M11 94 h18" stroke="#bd9152" stroke-width="1.5"/>
+    <defs><linearGradient id="bfoil" x1="0" x2="1"><stop offset="0" stop-color="#8a6230"/><stop offset=".5" stop-color="#f0d79a"/><stop offset="1" stop-color="#8a6230"/></linearGradient></defs>` },
+  mandarins: { cls: '', pos: 'right:2.5%', w: 96, h: 52, svg: `
+    <defs><radialGradient id="mand" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#ffc061"/><stop offset=".55" stop-color="#f08a1c"/><stop offset="1" stop-color="#b8530c"/></radialGradient></defs>
+    <circle cx="26" cy="34" r="17" fill="url(#mand)"/><circle cx="68" cy="35" r="16" fill="url(#mand)"/>
+    <g class="m3"><circle cx="47" cy="22" r="17" fill="url(#mand)"/><path d="M47 6 q8 -6 14 0 q-8 4 -14 0" fill="#3f7a3a"/></g>
+    <g class="peeled" style="display:none"><circle cx="47" cy="22" r="15" fill="#f6a84a"/>
+      <g stroke="#fbe0b0" stroke-width="1.2" fill="none"><path d="M47 7 v30 M36 11 q6 11 0 22 M58 11 q-6 11 0 22"/></g></g>
+    <g fill="#b8530c" opacity=".4"><circle cx="20" cy="30" r=".9"/><circle cx="30" cy="38" r=".9"/><circle cx="64" cy="31" r=".9"/><circle cx="72" cy="40" r=".9"/></g>` },
+};
+function glassSVG() {
+  return `<path d="M5 4 L29 4 L25 40 Q17 48 9 40Z" fill="rgba(225,238,242,.35)" stroke="rgba(255,255,255,.85)" stroke-width="1.2"/>
+    <path d="M7.5 16 L26.5 16 L24.6 38 Q17 45 9.4 38Z" fill="rgba(240,200,110,.75)"/>
+    <g fill="#fff6dc"><circle cx="14" cy="30" r="1"/><circle cx="19" cy="24" r=".9"/><circle cx="17" cy="35" r=".8"/></g>
+    <g stroke="rgba(255,255,255,.7)" stroke-width=".8"><path d="M9 6 L13 40 M17 4 L17 44 M25 6 L21 40"/></g>
+    <path d="M17 46 L17 70" stroke="rgba(235,245,248,.9)" stroke-width="3"/>
+    <ellipse cx="17" cy="74" rx="11" ry="3.5" fill="rgba(225,238,242,.6)" stroke="rgba(255,255,255,.85)"/>`;
+}
+const tableEl = $('#table');
+const thingEls = {};
+for (const [k, t] of Object.entries(THINGS)) {
+  const d = document.createElement('div');
+  d.className = 'thing ' + t.cls; d.style.cssText = t.pos; d.dataset.k = k;
+  d.innerHTML = `<svg width="${t.w}" height="${t.h}" viewBox="0 0 ${t.w} ${t.h}">${t.svg}</svg>`;
+  tableEl.appendChild(d); thingEls[k] = d;
+}
+function shakeEl(el) { el.classList.remove('shake'); void el.offsetWidth; el.classList.add('shake'); }
+const PHONE_LINES = [['Алло, Дедушка Мороз? Мы готовы!', 'Hello, Ded Moroz? We are ready!'], ['Бабушка звонит — поздравляет!', 'Grandma is calling to wish Happy New Year!'],
+  ['Алло, Снегурочка? Ждём к столу!', 'Hello, Snow Maiden? Come to the table!']];
+let phoneI = 0, mandPeeled = false, corkOut = false;
+tableEl.addEventListener('click', e => {
+  const th = e.target.closest('.thing'); if (!th) return;
+  const k = th.dataset.k;
+  if (k === 'phone') { shakeEl(th); ring(); const l = PHONE_LINES[phoneI++ % PHONE_LINES.length]; say(l[0], l[1]); }
+  if (k === 'salad') { shakeEl(th); bell(784, 0, .4, .08); say('Оливье — как у бабушки!', "Olivier salad, just like grandma's!"); }
+  if (k === 'glass1' || k === 'glass2') { shakeEl(th); clink(); say('Дзынь! За Новый год!', 'Clink! To the New Year!'); }
+  if (k === 'mandarins') {
+    mandPeeled = !mandPeeled; th.querySelector('.m3').style.display = mandPeeled ? 'none' : ''; th.querySelector('.peeled').style.display = mandPeeled ? '' : 'none';
+    noiseBurst(.12, 900, .15); if (mandPeeled) say('Пахнет Новым годом!', 'Smells like New Year!');
+  }
+  if (k === 'bottle' && !corkOut) {
+    corkOut = true; shakeEl(th); popSound();
+    const cap = th.querySelector('.corkcap'), r = th.getBoundingClientRect();
+    cap.style.display = 'none';
+    const cork = document.createElement('div'); cork.className = 'cork';
+    cork.innerHTML = '<svg width="14" height="12"><rect width="14" height="12" rx="3" fill="#c9a15e"/></svg>';
+    document.body.appendChild(cork);
+    let x = r.left + r.width / 2 - 7, y = r.top, vx = -3 - Math.random() * 4, vy = -16, rot = 0;
+    (function fly() {
+      vy += .6; x += vx; y += vy; rot += 14;
+      cork.style.transform = `translate(${x}px,${y}px) rotate(${rot}deg)`;
+      if (y < innerHeight + 30) requestAnimationFrame(fly); else cork.remove();
+    })();
+    confetti(110); hop(); say('С Новым годом! С новым счастьем!', 'Happy New Year! New happiness!');
+    setTimeout(() => { cap.style.display = ''; corkOut = false; }, 3500);
+  }
+});
+
+/* ---------- countdown to New Year ---------- */
+(() => {
+  const box = $('#countdown'); if (!box) return;
+  const now = new Date(), target = new Date(now.getMonth() === 0 && now.getDate() === 1 ? now.getFullYear() : now.getFullYear() + 1, 0, 1, 0, 0, 0);
+  const pad = n => String(n).padStart(2, '0');
+  function tickCd() {
+    const ms = target - new Date();
+    if (ms <= 0) { box.innerHTML = '<div class="verdict" style="color:var(--gold-l)">С Новым годом!<span class="en" style="color:var(--cream)">Happy New Year!</span></div>'; $('#cdTitle').style.display = 'none'; return; }
+    const s = Math.floor(ms / 1000);
+    $('#cdD').textContent = Math.floor(s / 86400); $('#cdH').textContent = pad(Math.floor(s / 3600) % 24);
+    $('#cdM').textContent = pad(Math.floor(s / 60) % 60); $('#cdS').textContent = pad(s % 60);
+    setTimeout(tickCd, 1000 - (Date.now() % 1000));
+  }
+  tickCd();
 })();
 
 /* ---------- start ---------- */
