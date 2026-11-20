@@ -142,6 +142,8 @@
   @keyframes spark{0%,100%{transform:scale(.6);opacity:.4}50%{transform:scale(1.1);opacity:1}}
   .blush{transition:opacity .3s}
   #goat.excited .blush{opacity:1}
+  #goat.yum .eye{transform:scaleY(.45)}
+  #goat.yum .blush{opacity:1}
   #goat.excited .sparkle{animation-duration:.9s}
   .bubble{position:absolute;top:2%;left:70%;width:max-content;max-width:240px;padding:11px 15px;border-radius:12px;
     background:var(--paper);color:var(--ink);font-weight:700;font-size:15px;line-height:1.3;border:1px solid var(--gold);
@@ -297,12 +299,13 @@
   .adj button:hover{border-color:var(--gold)}
   .traycard.winner .tray{filter:drop-shadow(0 0 28px rgba(242,193,78,.55)) drop-shadow(0 16px 22px rgba(0,0,0,.45))}
   .traycard .place{font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold-l);font-weight:700}
+  .traycard .full{font-size:12px;font-weight:700;letter-spacing:.06em;color:var(--ink);background:linear-gradient(#eef1f2,#a7adb2);padding:3px 12px;border-radius:999px;margin-top:-2px}
   .chip .cand{display:inline-flex;margin-left:2px}
   .flying{position:fixed;left:0;top:0;z-index:22;pointer-events:none;filter:drop-shadow(0 6px 8px rgba(0,0,0,.4))}
   .res .pts{display:flex;align-items:center;gap:2px;justify-content:flex-end;min-width:44px}
   .res .pts svg{margin-right:-6px}
   /* toast */
-  .toast{position:fixed;left:50%;top:70px;transform:translate(-50%,-10px);z-index:30;padding:8px 16px;border-radius:999px;
+  .toast{position:fixed;left:50%;bottom:110px;transform:translate(-50%,10px);z-index:30;padding:8px 16px;border-radius:999px;
     background:rgba(24,30,30,.85);border:1px solid var(--gold);color:var(--cream);font-size:14px;opacity:0;transition:.3s;pointer-events:none}
   .toast.show{opacity:1;transform:translate(-50%,0)}
 
@@ -611,6 +614,7 @@ const svg = $('#goat'), head = $('#head'), pupils = [...document.querySelectorAl
 const MAX = 9.5;
 let target = { x: null, y: null }, cur = pupils.map(() => ({ x: 0, y: 0 })), tilt = 0, lastMove = 0;
 let lookAt = null; // element the goat should look at (overrides idle)
+let forceLook = null; // element the goat must watch right now (overrides the pointer)
 function onMove(x, y) { target.x = x; target.y = y; lastMove = Date.now(); }
 addEventListener('pointermove', e => onMove(e.clientX, e.clientY));
 addEventListener('touchstart', e => { const t = e.touches[0]; onMove(t.clientX, t.clientY); }, { passive: true });
@@ -620,7 +624,8 @@ function toSvg(x, y) { const pt = svg.createSVGPoint(); pt.x = x; pt.y = y; retu
 let idle = { x: 0, y: 0 }, idleTimer = 0;
 function frame(t) {
   let tgt = null;
-  if (target.x !== null && Date.now() - lastMove < 4000) tgt = target;
+  if (forceLook && forceLook.isConnected) { const r = forceLook.getBoundingClientRect(); tgt = { x: r.left + r.width / 2, y: r.top + r.height / 2 }; }
+  else if (target.x !== null && Date.now() - lastMove < 4000) tgt = target;
   else if (lookAt) { const r = lookAt.getBoundingClientRect(); tgt = { x: r.left + r.width / 2, y: r.top + r.height / 2 }; }
   if (!tgt && t - idleTimer > 1800) {
     idleTimer = t;
@@ -794,10 +799,33 @@ function ensureCandies(t) {
   t.score = t.candies.length;
 }
 state.teams.forEach(ensureCandies);
+const TRAY_MAX = 40;
+const fullTrays = t => Math.floor(t.candies.length / TRAY_MAX);
+const milestones = [];
 function giveCandies(i, n) {
   const t = state.teams[i]; ensureCandies(t);
+  const before = fullTrays(t);
   const got = Array.from({ length: n }, () => CANDY_KEYS[Math.floor(Math.random() * CANDY_KEYS.length)]);
-  t.candies.push(...got); t.score = t.candies.length; return got;
+  t.candies.push(...got); t.score = t.candies.length;
+  if (fullTrays(t) > before) milestones.push(i);
+  return got;
+}
+const ORD = ['первый', 'второй', 'третий', 'четвёртый', 'пятый', 'шестой', 'седьмой', 'восьмой', 'девятый', 'десятый'];
+const ORD_EN = ['first', 'second', 'third', 'fourth', 'fifth', 'sixth', 'seventh', 'eighth', 'ninth', 'tenth'];
+function announceTrays(delay = 0) {
+  const list = milestones.splice(0);
+  list.forEach((i, k) => setTimeout(() => {
+    const t = state.teams[i], n = fullTrays(t) + 1;
+    say(`${t.name}, вы молодцы! Но нам теперь нужен ${ORD[n - 1] || n + '-й'} поднос!`, `Well done, ${t.name}! Now we need a ${ORD_EN[n - 1] || n + 'th'} tray!`, 5500);
+    hop(); fanfare(); confetti(160);
+    toast(`${t.name}: поднос полон — несём новый · tray is full, here comes a new one`);
+    if ($('#scr-menu').classList.contains('active')) renderTrays($('#menuTrays'), true);
+  }, delay + k * 5800));
+}
+function fullLabel(n) {
+  const m10 = n % 10, m100 = n % 100;
+  const ru = m10 === 1 && m100 !== 11 ? 'полный поднос' : m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14) ? 'полных подноса' : 'полных подносов';
+  return `${n} ${ru} · ${n} full`;
 }
 function takeCandy(i) { const t = state.teams[i]; ensureCandies(t); t.candies.pop(); t.score = t.candies.length; }
 
@@ -808,15 +836,16 @@ function traySVG(t, ti) {
   const g = 'tr' + (++trayUid);
   let s = (ti + 1) * 9301;
   const r = () => (s = (s * 16807) % 2147483647) / 2147483647;
-  const slots = [];
-  for (let layer = 0; layer < 3; layer++) {
+  const slots = [], LOFF = [[0, 0], [22, 15], [-14, 8], [10, -8]];
+  for (let layer = 0; layer < 4; layer++) {
     const L = [];
     for (let row = 0; row < 4; row++) for (let col = 0; col < 3; col++)
-      L.push([40 + col * 80 + (row % 2) * 14 + layer * 22, 34 + row * 36 + layer * 14]);
+      L.push([40 + col * 80 + (row % 2) * 14 + LOFF[layer][0], 34 + row * 36 + LOFF[layer][1]]);
     L.sort((a, b) => Math.hypot(a[0] - 118, a[1] - 92) - Math.hypot(b[0] - 118, b[1] - 92));
     slots.push(...L);
   }
-  const candies = t.candies.map((type, k) => {
+  const shown = t.candies.slice(fullTrays(t) * TRAY_MAX);
+  const candies = shown.map((type, k) => {
     const [x, y] = slots[k % slots.length], jx = (r() - .5) * 14, jy = (r() - .5) * 8, rot = (r() - .5) * 60;
     return `<g transform="translate(${(x + jx).toFixed(1)} ${(y + jy).toFixed(1)}) rotate(${rot.toFixed(1)} 42 21) scale(1.4)"><g class="cd" data-t="${type}"><title>${CANDY[type].ru} · ${CANDY[type].en}</title>${candyInner(type)}</g></g>`;
   }).join('');
@@ -833,7 +862,7 @@ function traySVG(t, ti) {
     <g fill="none" stroke="#ffffff" stroke-width="1.6" opacity=".7"><path d="M40 22 q-14 0 -18 14 M280 22 q14 0 18 14 M40 198 q-14 0 -18 -14 M280 198 q14 0 18 -14"/></g>
     <rect x="28" y="28" width="264" height="164" rx="24" fill="url(#${g}b)" stroke="#8b9297" stroke-width="1.2"/>
     <path d="M44 40 q60 -10 120 0" stroke="#fff" stroke-width="5" opacity=".45" fill="none" stroke-linecap="round"/>
-    ${t.candies.length ? '' : `<text x="160" y="116" text-anchor="middle" font-family="Marck Script, cursive" font-size="24" fill="#6d7479">пока пусто</text>`}
+    ${shown.length ? '' : `<text x="160" y="116" text-anchor="middle" font-family="Marck Script, cursive" font-size="24" fill="#6d7479">${fullTrays(t) ? 'новый поднос' : 'пока пусто'}</text>`}
     ${candies}
   </svg>`;
 }
@@ -841,6 +870,7 @@ function renderTrays(box, adjustable) {
   box.innerHTML = state.teams.map((t, i) => `
     <div class="traycard" style="--c:${t.color}">
       <div class="head"><span class="d ball cap">${ini(t)}</span>${esc(t.name)}<span class="cnt">${t.candies.length}</span></div>
+      ${fullTrays(t) ? `<div class="full">${fullLabel(fullTrays(t))}</div>` : ''}
       ${traySVG(t, i)}
       ${adjustable ? `<div class="adj"><button data-i="${i}" data-a="-1" title="Забрать конфету / Take one">−</button><span>конфеты · candies</span><button data-i="${i}" data-a="1" title="Дать конфету / Give one">+</button></div>` : ''}
     </div>`).join('');
@@ -852,7 +882,7 @@ document.addEventListener('click', e => {
   if (adj) {
     const i = +adj.dataset.i;
     if (+adj.dataset.a > 0) { giveCandies(i, 1); bell(1318, 0, .4, .1); } else { takeCandy(i); bell(523, 0, .3, .08); }
-    save(); renderMenu();
+    save(); renderMenu(); announceTrays(700);
   }
 });
 // candies fly from a point to a team's score chip
@@ -1195,7 +1225,7 @@ function renderReveal(body, q) {
     else {
       big.textContent = fmt(q.a);
       body.querySelectorAll('.pin').forEach(p => p.style.left = p.dataset.to + '%');
-      if (winners.length) { if (won) Object.entries(won).forEach(([i, a], k) => flyCandies(big, +i, a, k * 250)); fanfare(); confetti(min === 0 ? 220 : 120); hop(); say(min === 0 ? 'Невероятно! Прямо в точку!' : 'Браво!', min === 0 ? 'Incredible! Spot on!' : 'Bravo!'); }
+      if (winners.length) { if (won) { Object.entries(won).forEach(([i, a], k) => flyCandies(big, +i, a, k * 250)); announceTrays(2600); } fanfare(); confetti(min === 0 ? 220 : 120); hop(); say(min === 0 ? 'Невероятно! Прямо в точку!' : 'Браво!', min === 0 ? 'Incredible! Spot on!' : 'Bravo!'); }
       else { sad(); say('Эх, никто не рискнул…', 'Oh, nobody dared…'); }
     }
   })(t0);
@@ -1233,7 +1263,8 @@ function renderFinal() {
   const en = ['1st', '2nd', '3rd'];
   box.innerHTML = order.map((i, k) => { const t = state.teams[i];
     return `<div class="traycard ${k === 0 ? 'winner' : ''}" style="--c:${t.color}"><div class="place">${k + 1} место · ${en[k] || (k + 1) + 'th'}</div>
-      <div class="head"><span class="d ball cap">${ini(t)}</span>${esc(t.name)}<span class="cnt">${t.candies.length}</span></div>${traySVG(t, i)}</div>`; }).join('');
+      <div class="head"><span class="d ball cap">${ini(t)}</span>${esc(t.name)}<span class="cnt">${t.candies.length}</span></div>
+      ${fullTrays(t) ? `<div class="full">${fullLabel(fullTrays(t))}</div>` : ''}${traySVG(t, i)}</div>`; }).join('');
   $('#restList').innerHTML = '';
   const w = state.teams[order[0]];
   setTimeout(() => { confetti(260); fanfare(); hop(); say(`Победа: ${w.name}! Больше всех конфет!`, `${w.name} win with the most candies!`, 5000); }, 700);
@@ -1455,13 +1486,41 @@ const THINGS = {
     <path d="M20 76 l2 4.4 4.8.5-3.6 3.2 1 4.7-4.2-2.4-4.2 2.4 1-4.7-3.6-3.2 4.8-.5z" fill="#a3322a"/>
     <path d="M11 94 h18" stroke="#bd9152" stroke-width="1.5"/>
     <defs><linearGradient id="bfoil" x1="0" x2="1"><stop offset="0" stop-color="#8a6230"/><stop offset=".5" stop-color="#f0d79a"/><stop offset="1" stop-color="#8a6230"/></linearGradient></defs>` },
-  mandarins: { cls: '', pos: 'right:2.5%', w: 96, h: 52, svg: `
-    <defs><radialGradient id="mand" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#ffc061"/><stop offset=".55" stop-color="#f08a1c"/><stop offset="1" stop-color="#b8530c"/></radialGradient></defs>
-    <circle cx="26" cy="34" r="17" fill="url(#mand)"/><circle cx="68" cy="35" r="16" fill="url(#mand)"/>
-    <g class="m3"><circle cx="47" cy="22" r="17" fill="url(#mand)"/><path d="M47 6 q8 -6 14 0 q-8 4 -14 0" fill="#3f7a3a"/></g>
-    <g class="peeled" style="display:none"><circle cx="47" cy="22" r="15" fill="#f6a84a"/>
-      <g stroke="#fbe0b0" stroke-width="1.2" fill="none"><path d="M47 7 v30 M36 11 q6 11 0 22 M58 11 q-6 11 0 22"/></g></g>
-    <g fill="#b8530c" opacity=".4"><circle cx="20" cy="30" r=".9"/><circle cx="30" cy="38" r=".9"/><circle cx="64" cy="31" r=".9"/><circle cx="72" cy="40" r=".9"/></g>` },
+  mandarins: { cls: '', pos: 'right:2.5%', w: 112, h: 60, svg: `
+    <defs>
+      <radialGradient id="mdG" cx=".38" cy=".32" r=".75"><stop offset="0" stop-color="#ffb950"/><stop offset=".45" stop-color="#f58a1f"/><stop offset=".85" stop-color="#d9620e"/><stop offset="1" stop-color="#a8460a"/></radialGradient>
+      <radialGradient id="mdShade" cx=".5" cy=".85" r=".6"><stop offset="0" stop-color="#7a2e05" stop-opacity=".35"/><stop offset="1" stop-color="#7a2e05" stop-opacity="0"/></radialGradient>
+      <linearGradient id="mdLeaf" x1="0" x2="1"><stop offset="0" stop-color="#3f6e2a"/><stop offset=".5" stop-color="#6fa043"/><stop offset="1" stop-color="#3c6a28"/></linearGradient>
+      <pattern id="mdPores" width="4" height="4" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r=".45" fill="#b4500a"/><circle cx="3" cy="3" r=".35" fill="#ffd08a"/></pattern>
+    </defs>
+    <ellipse cx="56" cy="55" rx="46" ry="4" fill="#000" opacity=".2"/>
+    <g transform="rotate(-6 30 40)">
+      <ellipse cx="30" cy="40" rx="20" ry="16.5" fill="url(#mdG)"/>
+      <ellipse cx="30" cy="40" rx="20" ry="16.5" fill="url(#mdPores)" opacity=".55"/>
+      <ellipse cx="30" cy="40" rx="20" ry="16.5" fill="url(#mdShade)"/>
+      <path d="M15.0 34.225 Q30 27.625 45.0 34.225" stroke="#ffcf7a" stroke-width="1" fill="none" opacity=".35"/>
+      <ellipse cx="22.4" cy="33.07" rx="5.2" ry="2.64" fill="#fff" opacity=".45" transform="rotate(-25 22.4 33.07)"/>
+      <g transform="translate(30 25.7)"><path d="M0 -1.8 L1.2 0 L3 -.4 L1.6 1.1 L2.2 2.8 L0 1.8 L-2.2 2.8 L-1.6 1.1 L-3 -.4 L-1.2 0Z" fill="#5b7a2e"/><circle r=".9" fill="#3d5420"/></g>
+      
+    </g>
+    <g transform="rotate(8 76 41)">
+      <ellipse cx="76" cy="41" rx="19" ry="16" fill="url(#mdG)"/>
+      <ellipse cx="76" cy="41" rx="19" ry="16" fill="url(#mdPores)" opacity=".55"/>
+      <ellipse cx="76" cy="41" rx="19" ry="16" fill="url(#mdShade)"/>
+      <path d="M61.75 35.4 Q76 29.0 90.25 35.4" stroke="#ffcf7a" stroke-width="1" fill="none" opacity=".35"/>
+      <ellipse cx="68.78" cy="34.28" rx="4.94" ry="2.56" fill="#fff" opacity=".45" transform="rotate(-25 68.78 34.28)"/>
+      <g transform="translate(76 27.2)"><path d="M0 -1.8 L1.2 0 L3 -.4 L1.6 1.1 L2.2 2.8 L0 1.8 L-2.2 2.8 L-1.6 1.1 L-3 -.4 L-1.2 0Z" fill="#5b7a2e"/><circle r=".9" fill="#3d5420"/></g>
+      
+    </g>
+    <g class="m3" transform="rotate(-3 53 22)">
+      <ellipse cx="53" cy="22" rx="20" ry="16.5" fill="url(#mdG)"/>
+      <ellipse cx="53" cy="22" rx="20" ry="16.5" fill="url(#mdPores)" opacity=".55"/>
+      <ellipse cx="53" cy="22" rx="20" ry="16.5" fill="url(#mdShade)"/>
+      <path d="M38.0 16.225 Q53 9.625 68.0 16.225" stroke="#ffcf7a" stroke-width="1" fill="none" opacity=".35"/>
+      <ellipse cx="45.4" cy="15.07" rx="5.2" ry="2.64" fill="#fff" opacity=".45" transform="rotate(-25 45.4 15.07)"/>
+      <g transform="translate(53 7.7)"><path d="M0 -1.8 L1.2 0 L3 -.4 L1.6 1.1 L2.2 2.8 L0 1.8 L-2.2 2.8 L-1.6 1.1 L-3 -.4 L-1.2 0Z" fill="#5b7a2e"/><circle r=".9" fill="#3d5420"/></g>
+      <path d="M54 6.5 q8 -10 20 -6 q-6 9 -20 6z" fill="url(#mdLeaf)" stroke="#2f4f1f" stroke-width=".6"/><path d="M54 6.5 q9 -4 19 -5.6" stroke="#bfe08a" stroke-width=".6" fill="none" opacity=".8"/>
+    </g>` },
 };
 function glassSVG() {
   return `<path d="M5 4 L29 4 L25 40 Q17 48 9 40Z" fill="rgba(225,238,242,.35)" stroke="rgba(255,255,255,.85)" stroke-width="1.2"/>
@@ -1489,10 +1548,7 @@ tableEl.addEventListener('click', e => {
   if (k === 'phone') { shakeEl(th); ring(); const l = PHONE_LINES[phoneI++ % PHONE_LINES.length]; say(l[0], l[1]); }
   if (k === 'salad') { shakeEl(th); bell(784, 0, .4, .08); say('Оливье — как у бабушки!', "Olivier salad, just like grandma's!"); }
   if (k === 'glass1' || k === 'glass2') { shakeEl(th); clink(); say('Дзынь! За Новый год!', 'Clink! To the New Year!'); }
-  if (k === 'mandarins') {
-    mandPeeled = !mandPeeled; th.querySelector('.m3').style.display = mandPeeled ? 'none' : ''; th.querySelector('.peeled').style.display = mandPeeled ? '' : 'none';
-    noiseBurst(.12, 900, .15); if (mandPeeled) say('Пахнет Новым годом!', 'Smells like New Year!');
-  }
+  if (k === 'mandarins') rollTangerine(th);
   if (k === 'bottle' && !corkOut) {
     corkOut = true; shakeEl(th); popSound();
     const cap = th.querySelector('.corkcap'), r = th.getBoundingClientRect();
@@ -1510,6 +1566,55 @@ tableEl.addEventListener('click', e => {
     setTimeout(() => { cap.style.display = ''; corkOut = false; }, 3500);
   }
 });
+
+
+/* ---------- a tangerine rolls away ---------- */
+let rolling = false;
+const ROLL_SVG = `<svg width="44" height="38" viewBox="0 0 44 38"><g class="spin">
+  <ellipse cx="22" cy="19" rx="18" ry="18" fill="url(#mdG)"/><ellipse cx="22" cy="19" rx="18" ry="18" fill="url(#mdPores)" opacity=".55"/>
+  <ellipse cx="22" cy="19" rx="18" ry="18" fill="url(#mdShade)"/>
+  <ellipse cx="15" cy="12" rx="5.2" ry="2.6" fill="#fff" opacity=".45" transform="rotate(-25 15 12)"/>
+  <g transform="translate(22 3)"><path d="M0 -1.8 L1.2 0 L3 -.4 L1.6 1.1 L2.2 2.8 L0 1.8 L-2.2 2.8 L-1.6 1.1 L-3 -.4 L-1.2 0Z" fill="#5b7a2e"/></g></g></svg>`;
+function rollTangerine(th) {
+  if (rolling) return; rolling = true;
+  const top = th.querySelector('.m3'), r = top.getBoundingClientRect();
+  const x0 = r.left + r.width / 2 - 22, y0 = r.top + r.height - 38 + 2;
+  const yRoll = innerHeight - 93, R = 18;
+  top.style.transition = 'none'; top.style.opacity = '0';
+  const m = document.createElement('div'); m.className = 'flying'; m.innerHTML = ROLL_SVG; document.body.appendChild(m);
+  forceLook = m;
+  // hop off the pile, then roll left across the tablecloth and off the screen
+  const xLand = x0 - 46, dist = xLand + 80, dur = dist / .42;
+  const deg = d => -(d / (2 * Math.PI * R)) * 360;
+  thump(); say('Ой, укатилась!', 'Oops, it rolled away!', 2400);
+  m.animate([
+    { transform: `translate(${x0}px,${y0}px) rotate(0deg)` },
+    { transform: `translate(${x0 - 22}px,${y0 - 18}px) rotate(-40deg)`, offset: .35 },
+    { transform: `translate(${xLand}px,${yRoll}px) rotate(-90deg)`, offset: .75 },
+    { transform: `translate(${xLand - 10}px,${yRoll - 7}px) rotate(-120deg)`, offset: .88 },
+    { transform: `translate(${xLand - 18}px,${yRoll}px) rotate(-140deg)` }], { duration: 520, easing: 'ease-in', fill: 'forwards' }).onfinish = () => {
+    thump(); noiseBurst(Math.min(3, dur / 1000), 260, .05);
+    m.animate([{ transform: `translate(${xLand - 18}px,${yRoll}px) rotate(-140deg)` },
+      { transform: `translate(-80px,${yRoll}px) rotate(${-140 + deg(xLand + 62)}deg)` }],
+      { duration: dur, easing: 'cubic-bezier(.2,.4,.6,1)', fill: 'forwards' }).onfinish = () => {
+      m.remove(); forceLook = null;
+      // a new one rolls in from the right and hops back onto the pile
+      setTimeout(() => {
+        const n = document.createElement('div'); n.className = 'flying'; n.innerHTML = ROLL_SVG; document.body.appendChild(n);
+        const xs = innerWidth + 40, back = xs - (x0 + 30);
+        n.animate([{ transform: `translate(${xs}px,${yRoll}px) rotate(0deg)` },
+          { transform: `translate(${x0 + 30}px,${yRoll}px) rotate(${-deg(back)}deg)` }],
+          { duration: Math.max(500, back / .5), easing: 'cubic-bezier(.2,.6,.4,1)', fill: 'forwards' }).onfinish = () => {
+          n.animate([{ transform: `translate(${x0 + 30}px,${yRoll}px)` }, { transform: `translate(${x0 + 10}px,${y0 - 26}px)`, offset: .6 },
+            { transform: `translate(${x0}px,${y0}px)` }], { duration: 420, easing: 'ease-out', fill: 'forwards' }).onfinish = () => {
+            n.remove(); top.style.opacity = '1'; bell(1046, 0, .25, .06); rolling = false;
+          };
+        };
+        say('Держите новую!', 'Here comes another one!', 1800);
+      }, 600);
+    };
+  };
+}
 
 /* ---------- countdown to New Year ---------- */
 (() => {
