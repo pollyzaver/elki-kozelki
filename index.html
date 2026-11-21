@@ -49,6 +49,8 @@
   .table .cloth::before{content:"";position:absolute;left:0;right:0;top:22px;height:10px;opacity:.85;background-size:20px 10px;
     background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='10'%3E%3Cpath d='M3 1 L9 9 M9 1 L3 9' stroke='%23a3322a' stroke-width='1.6'/%3E%3Ccircle cx='15' cy='5' r='1.4' fill='%23bd9152'/%3E%3C/svg%3E")}
   .table .cloth::after{content:"";position:absolute;left:0;right:0;top:38px;height:2px;background:#a3322a;opacity:.55}
+  .thing,.orn,.lights,#goat,.table,.flying{-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+  .thing svg{pointer-events:none}
   .thing{position:absolute;bottom:44px;pointer-events:auto;cursor:pointer;transform-origin:50% 100%;transition:transform .2s;
     filter:drop-shadow(0 6px 4px rgba(0,0,0,.25))}
   .thing:hover{transform:translateY(-3px) rotate(-2deg)}
@@ -304,6 +306,80 @@
   .flying{position:fixed;left:0;top:0;z-index:22;pointer-events:none;filter:drop-shadow(0 6px 8px rgba(0,0,0,.4))}
   .res .pts{display:flex;align-items:center;gap:2px;justify-content:flex-end;min-width:44px}
   .res .pts svg{margin-right:-6px}
+
+  /* ---------- guess the melody ---------- */
+  .mrules{max-width:720px;margin:10px auto 0;text-align:center;color:var(--ink);font-size:15.5px;line-height:1.45}
+  .mrules .en{font-size:13.5px;color:var(--ink-2);opacity:1}
+  .board{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:22px}
+  .mcol{display:flex;flex-direction:column;gap:8px}
+  .mhead{font-family:'Oranienbaum',serif;font-size:19px;line-height:1.1;text-align:center;color:var(--red);min-height:46px;display:flex;flex-direction:column;justify-content:flex-end;padding-bottom:6px;border-bottom:1px solid rgba(154,112,56,.5)}
+  .mhead .en{font-family:'PT Sans';font-style:italic;font-size:12px;color:var(--ink-2);opacity:1}
+  .mcard{position:relative;text-align:left;border:1px solid rgba(42,28,22,.2);border-left:4px solid var(--gold);border-radius:6px;padding:9px 11px;
+    background:rgba(255,255,255,.35);cursor:pointer;font-family:inherit;color:var(--ink);display:flex;flex-direction:column;gap:2px;transition:.2s}
+  .mcard:hover{background:rgba(255,255,255,.7);transform:translateY(-2px)}
+  .mcard.d2{border-left-color:#c0662b} .mcard.d3{border-left-color:var(--red)}
+  .mcard .mnum{font-weight:700;font-size:15px}
+  .mcard .mdiff{font-size:11.5px;color:var(--ink-2)}
+  .mcard .mprize{display:flex;gap:0;margin-top:2px}
+  .mcard .mprize svg{margin-right:-8px;width:26px;height:13px}
+  .mcard.played{opacity:.45;cursor:default;text-decoration:none}
+  .mcard.played:hover{transform:none;background:rgba(255,255,255,.35)}
+  .mcard.add{border-style:dashed;border-left-width:1px;align-items:center;text-align:center;background:transparent}
+  .mcard .del{position:absolute;top:4px;right:8px;font-size:18px;color:var(--ink-2);line-height:1}
+  .mcard .del:hover{color:var(--red)}
+  .mnote{font-size:12px;color:var(--ink-2);line-height:1.35}
+  .mnote .en{font-size:11.5px}
+  .qmeta .mprize{display:flex;align-items:center;gap:6px}
+  .qmeta .mprize svg{margin-right:-10px}
+  .bidnum{font-family:'Oranienbaum',serif;font-size:clamp(90px,15vw,150px);line-height:1;text-align:center;color:var(--red);margin-top:10px}
+  .bidunit{text-align:center;color:var(--ink-2);font-weight:700;margin-top:-4px}
+  .bidlead{text-align:center;font-size:18px;margin:14px auto 0;max-width:640px;color:var(--ink)}
+  .bidlead .en{font-size:14px;color:var(--ink-2);opacity:1}
+  .bidteams{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-top:22px}
+  .bidbtn{display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px;border-radius:10px;border:1px solid rgba(42,28,22,.22);
+    background:rgba(255,255,255,.4);cursor:pointer;font-family:inherit;color:var(--ink);transition:.2s;border-top:4px solid var(--c)}
+  .bidbtn:hover{background:#fff;transform:translateY(-2px)}
+  .bidbtn:disabled{opacity:.4;pointer-events:none}
+  .bidbtn .d{width:34px;height:34px;font-size:17px}
+  .bidbtn b{font-size:16px}
+  .bidbtn span:last-child{font-size:13px;color:var(--ink-2)}
+  .dots{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin:26px 0}
+  .dots i{width:18px;height:18px;border-radius:50%;border:2px solid rgba(42,28,22,.3);transition:.15s}
+  .dots i.on{background:var(--red);border-color:var(--red);box-shadow:0 0 12px rgba(163,50,42,.6);transform:scale(1.15)}
+  #playBtn{display:inline-flex;flex-direction:column;align-items:center}
+  .answerbox{margin-top:24px;transition:opacity .3s}
+  .answerbox.hide{opacity:0;pointer-events:none}
+  .mtitle{font-family:'Oranienbaum',serif;font-size:clamp(30px,4.5vw,48px);line-height:1.15;color:var(--ink);margin-top:8px}
+  .minfo{margin-top:10px;color:var(--ink-2)}
+  .mnotefly{font-size:26px;color:var(--gold-l);text-shadow:0 0 10px rgba(255,200,120,.7);font-family:serif}
+  #goat.listen .eye{transform:scaleY(.12)}
+  .modal{position:fixed;inset:0;z-index:30;background:rgba(10,12,12,.6);display:grid;place-items:center;padding:20px;backdrop-filter:blur(3px)}
+  .mform{max-width:520px}
+  .mform label{display:flex;flex-direction:column;gap:6px;font-weight:700;font-size:14px;margin-top:14px;color:var(--ink)}
+  .mform input[type=text],.mform input[type=number]{font:400 18px 'PT Sans';padding:8px 10px;border:1px solid rgba(42,28,22,.3);border-radius:6px;background:rgba(255,255,255,.6);color:var(--ink)}
+  @media (max-width:820px){.board{grid-template-columns:1fr 1fr}}
+
+  /* ---------- quiz ---------- */
+  .qzboard{grid-template-columns:repeat(5,1fr)}
+  .turn{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;margin:18px auto 0;font-weight:700;font-size:18px;color:var(--ink)}
+  .turn .d{width:34px;height:34px;font-size:17px}
+  .turn .en{width:100%;text-align:center;font-size:13px;color:var(--ink-2);opacity:1;margin-top:-6px}
+  .turn.small{justify-content:flex-start;font-size:16px;margin-top:18px}
+  .turn.small .en{width:auto;margin:0}
+  .opts{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:22px 0}
+  .qopt{display:flex;align-items:center;gap:14px;text-align:left;padding:14px 16px;border-radius:10px;border:1px solid rgba(42,28,22,.25);
+    background:rgba(255,255,255,.45);color:var(--ink);font-family:inherit;font-size:18px;font-weight:700;cursor:pointer;transition:.2s}
+  button.qopt:hover{background:#fff;transform:translateY(-2px);border-color:var(--gold-d)}
+  .qopt b{font-family:'Oranienbaum',serif;font-weight:400;font-size:28px;color:var(--red);width:28px;flex:none;text-align:center}
+  .qopt span{display:flex;flex-direction:column}
+  .qopt i{font-weight:400;font-size:14px;color:var(--ink-2);margin-top:2px}
+  .qopt.bad{background:rgba(163,50,42,.12);border-color:rgba(163,50,42,.5);text-decoration:line-through;text-decoration-color:rgba(163,50,42,.6);opacity:.75}
+  .qopt.good{background:rgba(63,122,82,.18);border:2px solid #3f7a52;box-shadow:0 0 0 4px rgba(63,122,82,.15)}
+  .qopt.good b{color:#3f7a52}
+  .qopt.dim{opacity:.5}
+  .qopt.shake{animation:shake .5s}
+  @media (max-width:1000px){.qzboard{grid-template-columns:repeat(3,1fr)}}
+  @media (max-width:700px){.qzboard{grid-template-columns:1fr 1fr}.opts{grid-template-columns:1fr}.qopt{font-size:16px}}
   /* toast */
   .toast{position:fixed;left:50%;bottom:110px;transform:translate(-50%,10px);z-index:30;padding:8px 16px;border-radius:999px;
     background:rgba(24,30,30,.85);border:1px solid var(--gold);color:var(--cream);font-size:14px;opacity:0;transition:.3s;pointer-events:none}
@@ -396,8 +472,8 @@
         <h3>Кто ближе?</h3>
         <p>Ответ — всегда число. Самая близкая команда получает конфету на свой поднос. Есть вопросы про Италию и Грецию.<span class="en" style="font-size:13px">Closest wins: every answer is a number — the nearest guess scores.</span></p>
       </button>
-      <div class="round paper soon"><span class="tag">Скоро</span><div class="emo"><svg viewBox="0 0 48 48" width="44" height="44" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 34V10l20-4v24"/><circle cx="13" cy="34" r="5"/><circle cx="33" cy="30" r="5"/></svg></div><h3>Угадай мелодию</h3><p>Новогодние песни с первых нот.<span class="en" style="font-size:13px">Name that tune · coming soon</span></p></div>
-      <div class="round paper soon"><span class="tag">Скоро</span><div class="emo"><svg viewBox="0 0 48 48" width="44" height="44" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="6" y="6" width="36" height="36" rx="10"/><path d="M19 19a5 5 0 1 1 7 4.6c-1.3.6-2 1.6-2 3V28"/><circle cx="24" cy="34" r="1.2" fill="currentColor"/></svg></div><h3>Викторина</h3><p>Вопросы с вариантами ответа.<span class="en" style="font-size:13px">Multiple-choice quiz · coming soon</span></p></div>
+      <button class="round paper" id="openMelody"><span class="tag" id="melodyTag">Играем</span><div class="emo"><svg viewBox="0 0 48 48" width="44" height="44" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 34V10l20-4v24"/><circle cx="13" cy="34" r="5"/><circle cx="33" cy="30" r="5"/></svg></div><h3>Угадай мелодию</h3><p>Классика, песни мира, русские мелодии и свои песни. Торгуемся за число нот!<span class="en" style="font-size:13px">Name that tune: bid on how few notes you need</span></p></button>
+      <button class="round paper" id="openQuiz"><span class="tag" id="quizTag">Играем</span><div class="emo"><svg viewBox="0 0 48 48" width="44" height="44" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="6" y="6" width="36" height="36" rx="10"/><path d="M19 19a5 5 0 1 1 7 4.6c-1.3.6-2 1.6-2 3V28"/><circle cx="24" cy="34" r="1.2" fill="currentColor"/></svg></div><h3>Викторина</h3><p>Советские фильмы, Новый год по миру, Италия и Греция, новогодний стол. Четыре варианта — один верный!<span class="en" style="font-size:13px">Multiple-choice quiz by topic and difficulty</span></p></button>
     </div>
     <h3 class="sec">Подносы с конфетами<span class="en">Candy trays</span></h3>
     <div class="trays" id="menuTrays"></div>
@@ -411,6 +487,24 @@
     <div class="scores" id="gameScores"></div>
   </div>
   <div id="closestBody" class="wrap" style="display:flex;justify-content:center"></div>
+</section>
+
+<!-- ================= MELODY ================= -->
+<section class="screen" id="scr-melody">
+  <div class="topbar">
+    <button class="ghost" data-go="menu">← Раунды<small>Rounds</small></button>
+    <div class="scores" id="melScores"></div>
+  </div>
+  <div id="melBody" class="wrap" style="display:flex;justify-content:center"></div>
+</section>
+
+<!-- ================= QUIZ ================= -->
+<section class="screen" id="scr-quiz">
+  <div class="topbar">
+    <button class="ghost" data-go="menu">← Раунды<small>Rounds</small></button>
+    <div class="scores" id="qzScores"></div>
+  </div>
+  <div id="qzBody" class="wrap" style="display:flex;justify-content:center"></div>
 </section>
 
 <!-- ================= FINAL ================= -->
@@ -886,10 +980,10 @@ document.addEventListener('click', e => {
   }
 });
 // candies fly from a point to a team's score chip
-function flyCandies(fromEl, teamIdx, types, delay = 0) {
+function flyCandies(fromEl, teamIdx, types, delay = 0, box = '#gameScores') {
   const from = fromEl.getBoundingClientRect();
   types.forEach((type, k) => setTimeout(() => {
-    const chip = document.querySelectorAll('#gameScores .chip')[teamIdx]; if (!chip) return;
+    const chip = document.querySelectorAll(box + ' .chip')[teamIdx]; if (!chip) return;
     const to = chip.getBoundingClientRect();
     const f = document.createElement('div'); f.className = 'flying'; f.innerHTML = candySVG(type, 60);
     document.body.appendChild(f);
@@ -910,7 +1004,8 @@ function go(name) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   const scr = $('#scr-' + name); scr.classList.add('active'); scr.scrollTop = 0;
   lookAt = null;
-  ({ teams: renderTeams, menu: renderMenu, closest: renderClosest, final: renderFinal }[name] || (() => {}))();
+  if (name !== 'melody' && typeof stopMelody === 'function') stopMelody();
+  ({ teams: renderTeams, menu: renderMenu, closest: renderClosest, melody: renderMelody, quiz: renderQuiz, final: renderFinal }[name] || (() => {}))();
   placeGoat();
 }
 document.addEventListener('click', e => { const b = e.target.closest('[data-go]'); if (b) go(b.dataset.go); });
@@ -962,12 +1057,16 @@ $('#teamsDone').onclick = () => {
    ===================================================================== */
 function renderMenu() {
   renderTrays($('#menuTrays'), true);
+  { const S = state.melody, n = S ? Object.keys(S.played).length : 0; $('#melodyTag').textContent = n ? `Сыграно ${n}` : 'Играем · Play';
+    const Z = state.quiz, z = Z ? Object.keys(Z.played).length : 0; $('#quizTag').textContent = z ? `Сыграно ${z}/${QZ.length}` : 'Играем · Play'; }
   const c = state.closest;
   $('#closestTag').textContent = !c ? 'Играем · Play' : c.done ? 'Сыграно' : `Вопрос ${c.idx + 1}/${c.order.length}`;
   setTimeout(() => say('Во что сыграем?', 'What shall we play?'), 400);
 }
 $('#openClosest').onclick = () => { if (state.closest && state.closest.done) state.closest = null; go('closest'); };
 $('#toFinal').onclick = () => go('final');
+$('#openMelody').onclick = () => go('melody');
+$('#openQuiz').onclick = () => go('quiz');
 
 /* =====================================================================
    "КТО БЛИЖЕ?" — QUESTIONS (RU / EN)
@@ -1614,6 +1713,577 @@ function rollTangerine(th) {
       }, 600);
     };
   };
+}
+
+/* =====================================================================
+   «УГАДАЙ МЕЛОДИЮ» — public-domain tunes played on a music box
+   ===================================================================== */
+const MEL_CATS = [
+  { id: 'world', ru: 'Новогодние песни мира', en: 'Holiday songs of the world' },
+  { id: 'classic', ru: 'Классика', en: 'Classical music' },
+  { id: 'russian', ru: 'Русские мелодии', en: 'Russian tunes' },
+  { id: 'own', ru: 'Свои мелодии', en: 'Your own songs' },
+];
+const DIFF = { 1: { ru: 'Легко', en: 'Easy', start: 5 }, 2: { ru: 'Средне', en: 'Medium', start: 7 }, 3: { ru: 'Сложно', en: 'Hard', start: 9 } };
+// notes: "pitch:beats", R = rest. All melodies below are public domain.
+const MELODIES = [
+  { id: 'jingle', cat: 'world', d: 1, t: .27, o: 12, ru: 'Jingle Bells («Бубенцы»)', en: 'Jingle Bells', info: ['Джеймс Пьерпонт, 1857', 'James Lord Pierpont, 1857'],
+    n: 'E4:1 E4:1 E4:2 E4:1 E4:1 E4:2 E4:1 G4:1 C4:1.5 D4:.5 E4:4 F4:1 F4:1 F4:1.5 F4:.5 F4:1 E4:1 E4:1 E4:.5 E4:.5 E4:1 D4:1 D4:1 E4:1 D4:2 G4:2' },
+  { id: 'wish', cat: 'world', d: 1, t: .3, o: 12, ru: 'We Wish You a Merry Christmas', en: 'We Wish You a Merry Christmas', info: ['Английская народная песня', 'Traditional English carol'],
+    n: 'D4:1 G4:1 G4:.5 A4:.5 G4:.5 F#4:.5 E4:1 E4:1 E4:1 A4:1 A4:.5 B4:.5 A4:.5 G4:.5 F#4:1 D4:1 D4:1 B4:1 B4:.5 C5:.5 B4:.5 A4:.5 G4:1 E4:1 D4:.5 D4:.5 E4:1 A4:1 F#4:1 G4:2' },
+  { id: 'deck', cat: 'world', d: 2, t: .28, o: 12, ru: 'Deck the Halls («Фа-ла-ла-ла-ла»)', en: 'Deck the Halls', info: ['Валлийская народная мелодия, XVI век', 'Traditional Welsh tune, 16th century'],
+    n: 'G4:1.5 F4:.5 E4:1 D4:1 C4:1 D4:1 E4:1 C4:1 D4:.5 E4:.5 F4:.5 D4:.5 E4:1.5 D4:.5 C4:1 B3:1 C4:2' },
+  { id: 'silent', cat: 'world', d: 2, t: .3, o: 12, ru: 'Тихая ночь (Silent Night)', en: 'Silent Night', info: ['Франц Грубер, 1818', 'Franz Xaver Gruber, 1818'],
+    n: 'G4:1.5 A4:.5 G4:1 E4:3 G4:1.5 A4:.5 G4:1 E4:3 D5:2 D5:1 B4:3 C5:2 C5:1 G4:3' },
+  { id: 'tannen', cat: 'world', d: 2, t: .32, o: 12, ru: 'O Tannenbaum («О ёлочка»)', en: 'O Christmas Tree', info: ['Немецкая народная мелодия, слова 1824', 'German folk tune, lyrics 1824'],
+    n: 'C4:1 F4:.75 F4:.25 F4:1.5 G4:.5 A4:.75 A4:.25 A4:1.5 A4:.5 G4:.5 A4:.5 Bb4:1 E4:1 G4:1 F4:2' },
+  { id: 'joy', cat: 'world', d: 2, t: .33, o: 12, ru: 'Joy to the World («Радуйся, мир»)', en: 'Joy to the World', info: ['Лоуэлл Мейсон по мотивам Генделя, 1839', 'Lowell Mason after Handel, 1839'],
+    n: 'C5:1.5 B4:.5 A4:1.5 G4:.5 F4:1 E4:1 D4:1 C4:2 G4:.5 A4:1.5 A4:.5 B4:1.5 B4:.5 C5:3' },
+  { id: 'bells', cat: 'world', d: 2, t: .3, o: 12, ru: 'Щедрик (Carol of the Bells)', en: 'Carol of the Bells (Shchedryk)', info: ['Николай Леонтович, 1914', 'Mykola Leontovych, 1914'],
+    n: 'Bb4:1 A4:.5 Bb4:.5 G4:1 Bb4:1 A4:.5 Bb4:.5 G4:1 Bb4:1 A4:.5 Bb4:.5 G4:1 Bb4:1 A4:.5 Bb4:.5 G4:1' },
+  { id: 'hark', cat: 'world', d: 3, t: .3, o: 12, ru: 'Hark! The Herald Angels Sing', en: 'Hark! The Herald Angels Sing', info: ['Феликс Мендельсон, 1840', 'Felix Mendelssohn, 1840'],
+    n: 'D4:1 G4:1 G4:1.5 F#4:.5 G4:1 B4:1 B4:1 A4:1 D5:1 D5:1 D5:1.5 C5:.5 B4:1 A4:1 B4:2' },
+  { id: 'godrest', cat: 'world', d: 3, t: .28, o: 12, ru: 'God Rest Ye Merry, Gentlemen', en: 'God Rest Ye Merry, Gentlemen', info: ['Английская народная песня, XVIII век', 'Traditional English carol, 18th century'],
+    n: 'E4:1 E4:1 B4:1 B4:1 A4:1 G4:1 F#4:1 E4:1 D4:1 E4:1 F#4:1 G4:1 A4:1 B4:3' },
+  { id: 'wenceslas', cat: 'world', d: 3, t: .3, o: 12, ru: 'Good King Wenceslas', en: 'Good King Wenceslas', info: ['Мелодия XIII века, слова 1853', '13th-century tune, lyrics 1853'],
+    n: 'G4:1 G4:1 G4:1 A4:1 G4:1 G4:1 D4:2 E4:1 D4:1 E4:1 F#4:1 G4:2 G4:2' },
+  { id: 'adeste', cat: 'world', d: 3, t: .3, o: 12, ru: 'O Come, All Ye Faithful (Adeste Fideles)', en: 'O Come, All Ye Faithful', info: ['Джон Фрэнсис Уэйд, XVIII век', 'John Francis Wade, 18th century'],
+    n: 'G4:2 G4:1 D4:1 G4:2 A4:2 D4:4 B4:1 A4:1 B4:1 C5:1 B4:2 A4:2' },
+
+  { id: 'ode', cat: 'classic', d: 1, t: .33, o: 12, ru: 'Ода к радости', en: 'Ode to Joy', info: ['Людвиг ван Бетховен, 9-я симфония, 1824', 'Ludwig van Beethoven, Symphony No. 9, 1824'],
+    n: 'E4:1 E4:1 F4:1 G4:1 G4:1 F4:1 E4:1 D4:1 C4:1 C4:1 D4:1 E4:1 E4:1.5 D4:.5 D4:2' },
+  { id: 'elise', cat: 'classic', d: 1, t: .3, o: 0, ru: 'К Элизе', en: 'Für Elise', info: ['Людвиг ван Бетховен, 1810', 'Ludwig van Beethoven, 1810'],
+    n: 'E5:.5 D#5:.5 E5:.5 D#5:.5 E5:.5 B4:.5 D5:.5 C5:.5 A4:1.5 C4:.5 E4:.5 A4:.5 B4:1.5 E4:.5 G#4:.5 B4:.5 C5:1.5' },
+  { id: 'serenade', cat: 'classic', d: 2, t: .3, o: 12, ru: 'Маленькая ночная серенада', en: 'Eine kleine Nachtmusik', info: ['Вольфганг Амадей Моцарт, 1787', 'Wolfgang Amadeus Mozart, 1787'],
+    n: 'G4:1 R:.5 D4:.5 G4:1 R:.5 D4:.5 G4:.5 D4:.5 G4:.5 B4:.5 D5:2 C5:1 R:.5 A4:.5 C5:1 R:.5 A4:.5 C5:.5 A4:.5 F#4:.5 A4:.5 D4:2' },
+  { id: 'troll', cat: 'classic', d: 2, t: .28, o: 12, ru: 'В пещере горного короля', en: 'In the Hall of the Mountain King', info: ['Эдвард Григ, «Пер Гюнт», 1875', 'Edvard Grieg, Peer Gynt, 1875'],
+    n: 'A3:.5 B3:.5 C4:.5 D4:.5 E4:.5 C4:.5 E4:1 D#4:.5 B3:.5 D#4:1 D4:.5 Bb3:.5 D4:1 A3:.5 B3:.5 C4:.5 D4:.5 E4:.5 C4:.5 E4:.5 A4:.5 G4:.5 E4:.5 C4:.5 E4:.5 G4:2' },
+  { id: 'lullaby', cat: 'classic', d: 2, t: .38, o: 12, ru: 'Колыбельная', en: 'Lullaby (Wiegenlied)', info: ['Иоганнес Брамс, 1868', 'Johannes Brahms, 1868'],
+    n: 'E4:.5 E4:.5 G4:2 E4:.5 E4:.5 G4:2 E4:.5 G4:.5 C5:1 B4:1.5 A4:.5 A4:1 G4:1 D4:.5 E4:.5 F4:1 D4:1 D4:.5 E4:.5 F4:2' },
+  { id: 'danube', cat: 'classic', d: 3, t: .28, o: 0, ru: 'На прекрасном голубом Дунае', en: 'The Blue Danube', info: ['Иоганн Штраус (сын), 1866', 'Johann Strauss II, 1866'],
+    n: 'D4:1 D4:1 F#4:1 A4:1 A4:2 A5:1 A5:2 F#5:1 F#5:2 D4:1 D4:1 F#4:1 A4:1 A4:2 A5:1 A5:2 G5:1 G5:2' },
+
+  { id: 'yolochka', cat: 'russian', d: 1, t: .3, o: 12, ru: 'В лесу родилась ёлочка', en: 'A Little Fir Tree Was Born in the Forest', info: ['Леонид Бекман, 1905', 'Leonid Bekman, 1905'],
+    n: 'C4:1 A4:1 A4:1 G4:1 A4:1 F4:1 C4:1 C4:1 C4:1 A4:1 A4:1 Bb4:1 G4:1 C5:3' },
+  { id: 'korobeiniki', cat: 'russian', d: 2, t: .27, o: 0, ru: 'Коробейники («Ой, полным-полна моя коробушка»)', en: 'Korobeiniki — yes, the Tetris song!', info: ['Народная мелодия на стихи Некрасова, 1861', 'Folk tune to Nekrasov’s poem, 1861'],
+    n: 'E5:1 B4:.5 C5:.5 D5:1 C5:.5 B4:.5 A4:1 A4:.5 C5:.5 E5:1 D5:.5 C5:.5 B4:1.5 C5:.5 D5:1 E5:1 C5:1 A4:1 A4:2' },
+  { id: 'sugarplum', cat: 'russian', d: 3, t: .3, o: 0, ru: 'Танец Феи Драже («Щелкунчик»)', en: 'Dance of the Sugar Plum Fairy (The Nutcracker)', info: ['Пётр Чайковский, 1892', 'Pyotr Tchaikovsky, 1892'],
+    n: 'G5:.5 E5:.5 G5:.5 F#5:.5 D#5:1 E5:1 D5:.33 D5:.33 D5:.34 C#5:1 C5:.33 C5:.33 C5:.34 B4:1' },
+];
+
+/* ---------- music-box synth with a little room reverb ---------- */
+let musicBus = null, melNodes = [], melTimers = [];
+function getBus() {
+  const a = ctx(); if (!a) return null; if (a.state === 'suspended') a.resume();
+  if (musicBus) return musicBus;
+  const len = a.sampleRate * 1.8, ir = a.createBuffer(2, len, a.sampleRate);
+  for (let c = 0; c < 2; c++) { const d = ir.getChannelData(c); for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 2.5); }
+  const conv = a.createConvolver(); conv.buffer = ir;
+  const inp = a.createGain(), dry = a.createGain(), wet = a.createGain(); dry.gain.value = .85; wet.gain.value = .3;
+  inp.connect(dry).connect(a.destination); inp.connect(conv).connect(wet).connect(a.destination);
+  return (musicBus = inp);
+}
+const SEMI = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
+function freqOf(p, shift = 0) {
+  const m = /^([A-G])(#|b)?(\d)$/.exec(p); if (!m) return 0;
+  const midi = 12 * (+m[3] + 1) + SEMI[m[1]] + (m[2] === '#' ? 1 : m[2] === 'b' ? -1 : 0) + shift;
+  return 440 * Math.pow(2, (midi - 69) / 12);
+}
+const parseMel = s => s.trim().split(/\s+/).map(tok => { const [p, b] = tok.split(':'); return { p: p === 'R' ? null : p, b: +b }; });
+function boxNote(f, t, dur) {
+  const a = ctx(), bus = getBus(); if (!a || !bus) return;
+  [[1, .32], [2, .1], [3, .05], [4.2, .03]].forEach(([h, v]) => {
+    const o = a.createOscillator(), g = a.createGain();
+    o.type = 'sine'; o.frequency.value = f * h;
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(v, t + .005);
+    g.gain.exponentialRampToValueAtTime(.0001, t + Math.max(.5, dur * 2.4) / (h > 1 ? h * .7 : 1));
+    o.connect(g).connect(bus); o.start(t); o.stop(t + 2.6); melNodes.push(o);
+  });
+}
+function stopMelody() {
+  melTimers.forEach(clearTimeout); melTimers = [];
+  melNodes.forEach(o => { try { o.stop(); } catch (e) {} }); melNodes = [];
+  if (ownAudio) { ownAudio.pause(); ownAudio = null; }
+  svg.classList.remove('listen');
+}
+// plays the first `count` notes (all if count is falsy); calls onNote(i) as each sounds
+function playMelody(m, count, onNote, onEnd) {
+  stopMelody();
+  const a = ctx(); if (!a) return; getBus();
+  const notes = parseMel(m.n), t0 = a.currentTime + .08;
+  let t = 0, k = 0;
+  for (const nt of notes) {
+    if (count && k >= count) break;
+    if (nt.p) {
+      boxNote(freqOf(nt.p, m.o), t0 + t * m.t * 2, nt.b * m.t * 2);
+      const idx = k; melTimers.push(setTimeout(() => onNote && onNote(idx), (t * m.t * 2 + .08) * 1000));
+      k++;
+    }
+    t += nt.b;
+  }
+  svg.classList.add('listen');
+  melTimers.push(setTimeout(() => { svg.classList.remove('listen'); onEnd && onEnd(); }, (t * m.t * 2 + .9) * 1000));
+}
+const noteCount = m => parseMel(m.n).filter(x => x.p).length;
+
+/* ---------- own audio files (kept only in this browser) ---------- */
+let ownAudio = null;
+function idb() {
+  return new Promise((res, rej) => {
+    try { const r = indexedDB.open('elki-kozelki-media', 1);
+      r.onupgradeneeded = () => r.result.createObjectStore('tracks');
+      r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error);
+    } catch (e) { rej(e); }
+  });
+}
+async function idbDo(mode, fn) { const db = await idb(); return new Promise((res, rej) => { const tx = db.transaction('tracks', mode), st = tx.objectStore('tracks'); const r = fn(st); tx.oncomplete = () => res(r && r.result); tx.onerror = () => rej(tx.error); }); }
+const ownList = () => (state.ownTracks = state.ownTracks || []);
+function ownMel(id) { const o = ownList().find(x => x.id === id); return o && { ...o, cat: 'own', own: true, info: ['Свой файл', 'Your own file'] }; }
+async function playOwn(m, seconds, onTick, onEnd) {
+  stopMelody();
+  let blob; try { blob = await idbDo('readonly', st => st.get(m.id)); } catch (e) {}
+  if (!blob) { say('Не нашла этот файл — добавьте песню заново', 'File not found — please add it again'); return; }
+  ownAudio = new Audio(URL.createObjectURL(blob)); ownAudio.currentTime = m.start || 0;
+  try { await ownAudio.play(); } catch (e) { return; }
+  svg.classList.add('listen');
+  const total = seconds || 25;
+  for (let s = 0; s < total; s++) melTimers.push(setTimeout(() => onTick && onTick(s), s * 1000));
+  melTimers.push(setTimeout(() => { if (ownAudio) ownAudio.pause(); svg.classList.remove('listen'); onEnd && onEnd(); }, total * 1000));
+}
+
+/* ---------- helpers ---------- */
+const melById = id => MELODIES.find(m => m.id === id) || ownMel(id);
+function plural(n, one, few, many) { const a = n % 10, b = n % 100; return a === 1 && b !== 11 ? one : a >= 2 && a <= 4 && (b < 12 || b > 14) ? few : many; }
+const unitRu = (m, n) => m.own ? plural(n, 'секунду', 'секунды', 'секунд') : plural(n, 'ноту', 'ноты', 'нот');
+const unitEn = (m, n) => m.own ? (n === 1 ? 'second' : 'seconds') : (n === 1 ? 'note' : 'notes');
+const prizeIcons = d => Array.from({ length: d }, (_, i) => candySVG(['batonchik', 'belochka', 'mak'][i], 30)).join('');
+const PLAY_ICON = '<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M7 4.5v15l13-7.5z"/></svg>';
+const melState = () => (state.melody = state.melody || { played: {}, cur: null });
+
+/* ---------- screen ---------- */
+function renderMelody() {
+  stopMelody();
+  renderScores($('#melScores'));
+  const S = melState(), body = $('#melBody');
+  if (!S.cur) return renderBoard(body);
+  const m = melById(S.cur.id); if (!m) { S.cur = null; save(); return renderBoard(body); }
+  ({ bid: renderBid, play: renderPlay, steal: renderSteal, reveal: renderMelReveal }[S.cur.stage] || renderBoard)(body, m);
+}
+
+function renderBoard(body) {
+  const S = melState();
+  const col = c => {
+    const items = c.id === 'own' ? ownList().map(o => ({ ...o, cat: 'own', own: true })) : MELODIES.filter(m => m.cat === c.id);
+    items.sort((a, b) => a.d - b.d);
+    let num = 0;
+    return `<div class="mcol"><div class="mhead">${esc(c.ru)}<span class="en">${esc(c.en)}</span></div>
+      ${items.map(m => { num++; const done = S.played[m.id];
+        return `<button class="mcard d${m.d} ${done ? 'played' : ''}" data-id="${m.id}">
+          ${m.own ? `<span class="del" data-del="${m.id}" title="Удалить / Delete">×</span>` : ''}
+          <span class="mnum">${done ? esc(m.ru) : 'Мелодия ' + num}</span>
+          <span class="mdiff">${DIFF[m.d].ru} · ${DIFF[m.d].en}</span>
+          <span class="mprize">${prizeIcons(m.d)}</span></button>`; }).join('')}
+      ${c.id === 'own' ? `<button class="mcard add" id="addOwn"><span class="mnum">+ Добавить песню</span><span class="mdiff">Add a song from your computer</span></button>
+        <p class="mnote">Песни хранятся только в этом браузере и никуда не загружаются. Торг здесь — на секунды.<span class="en">Songs stay in this browser only. Here you bid in seconds.</span></p>` : ''}
+    </div>`;
+  };
+  body.innerHTML = `
+  <div class="qcard paper">
+    <h2>Угадай мелодию<span class="en">Name that tune</span></h2>
+    <p class="mrules">Выбирайте тему и сложность. Команды торгуются: «Угадаем за 6 нот!» — «А мы за 5!». Кто назвал меньше всех — слушает столько нот и отвечает. За победу — конфеты: чем сложнее, тем больше.
+      <span class="en">Pick a theme and difficulty. Teams bid how few notes they need — the lowest bidder listens and answers. Harder tunes earn more candies.</span></p>
+    <div class="board">${MEL_CATS.map(col).join('')}</div>
+    <div class="center" style="margin-top:18px"><button class="ghost" id="melReset">Начать табло заново<small>Reset board</small></button></div>
+  </div>`;
+  body.querySelectorAll('.mcard[data-id]').forEach(b => b.addEventListener('click', e => {
+    if (e.target.closest('.del')) return;
+    const id = b.dataset.id; if (S.played[id]) { say('Эту мелодию уже играли', 'Already played'); return; }
+    const m = melById(id);
+    S.cur = { id, stage: 'bid', bid: DIFF[m.d].start, leader: null }; save(); hop(); bell(1046, 0, .4, .1); renderMelody();
+  }));
+  body.querySelectorAll('.del').forEach(x => x.addEventListener('click', async e => {
+    e.stopPropagation(); const id = x.dataset.del;
+    state.ownTracks = ownList().filter(o => o.id !== id); delete S.played[id]; save();
+    try { await idbDo('readwrite', st => st.delete(id)); } catch (err) {}
+    renderMelody();
+  }));
+  $('#addOwn').onclick = openAddOwn;
+  $('#melReset').onclick = () => { S.played = {}; S.cur = null; save(); renderMelody(); };
+  setTimeout(() => say('Выбирайте мелодию!', 'Pick a tune!'), 300);
+}
+
+function metaLine(m) {
+  const cat = MEL_CATS.find(c => c.id === m.cat);
+  return `<div class="qmeta"><span>${esc(cat.ru)} · ${DIFF[m.d].ru}</span><span class="mprize">приз · prize ${prizeIcons(m.d)}</span></div><div class="progress"><i style="width:100%"></i></div>`;
+}
+
+function renderBid(body, m) {
+  const S = melState(), c = S.cur, lead = c.leader !== null ? state.teams[c.leader] : null;
+  body.innerHTML = `
+  <div class="qcard paper">
+    ${metaLine(m)}
+    <h2>Торгуемся!<span class="en">Place your bids!</span></h2>
+    <div class="bidnum">${c.bid}</div>
+    <div class="bidunit">${unitRu(m, c.bid)} · ${unitEn(m, c.bid)}</div>
+    <div class="bidlead">${lead ? `Команда «${esc(lead.name)}» угадает за ${c.bid} ${unitRu(m, c.bid)}. Кто меньше?<span class="en">${esc(lead.name)} will name it in ${c.bid}. Anyone fewer?</span>`
+      : `Стартовая ставка — ${c.bid} ${unitRu(m, c.bid)}. Кто берётся?<span class="en">Starting bid: ${c.bid} ${unitEn(m, c.bid)}. Who’s in?</span>`}</div>
+    <div class="bidteams">${state.teams.map((t, i) => {
+      const next = c.leader === null ? c.bid : c.bid - 1, dis = next < 1 || c.leader === i;
+      return `<button class="bidbtn" data-i="${i}" style="--c:${t.color}" ${dis ? 'disabled' : ''}><span class="d ball">${ini(t)}</span><b>${esc(t.name)}</b><span>за ${next} · in ${next}</span></button>`; }).join('')}</div>
+    <div class="qactions" style="margin-top:22px">
+      <button class="ghost" id="bidReset">Сбросить торг<small>Reset</small></button>
+      <button class="btn gold" id="bidGo" ${lead ? '' : 'disabled'}>Слушаем!<small>Let’s listen</small></button>
+    </div>
+  </div>`;
+  body.querySelectorAll('.bidbtn').forEach(b => b.onclick = () => {
+    const i = +b.dataset.i;
+    if (c.leader !== null) c.bid = Math.max(1, c.bid - 1);
+    c.leader = i; save(); bell(784 + (DIFF[m.d].start - c.bid) * 60, 0, .35, .1);
+    say(c.bid === 1 ? 'С одной ноты?! Смело!' : `${state.teams[i].name}: за ${c.bid}!`, c.bid === 1 ? 'From ONE note?! Bold!' : `${state.teams[i].name}: in ${c.bid}!`);
+    renderMelody();
+  });
+  $('#bidReset').onclick = () => { c.bid = DIFF[m.d].start; c.leader = null; save(); renderMelody(); };
+  $('#bidGo').onclick = () => { c.stage = 'play'; c.plays = 0; save(); renderMelody(); };
+}
+
+function renderPlay(body, m) {
+  const S = melState(), c = S.cur, lead = state.teams[c.leader];
+  const n = m.own ? c.bid : Math.min(c.bid, noteCount(m));
+  body.innerHTML = `
+  <div class="qcard paper">
+    ${metaLine(m)}
+    <h2>Слушаем!<span class="en">Listen closely!</span></h2>
+    <div class="bidlead">Отвечает команда <b style="color:${lead.color}">«${esc(lead.name)}»</b> — ${n} ${unitRu(m, n)}<span class="en">${esc(lead.name)} answers — ${n} ${unitEn(m, n)}</span></div>
+    <div class="dots" id="dots">${Array.from({ length: n }, () => '<i></i>').join('')}</div>
+    <div class="center"><button class="btn" id="playBtn">${PLAY_ICON} ${c.plays ? 'Ещё раз' : 'Играть'}<small>${c.plays ? 'Play again' : 'Play'}</small></button></div>
+    <div class="answerbox ${c.plays ? '' : 'hide'}" id="ansBox">
+      <div class="label">Команда угадала?<span class="en">Did they get it right?</span></div>
+      <div class="center" style="margin-top:12px">
+        <button class="btn gold" id="ansYes">Угадали!<small>Correct</small></button>
+        <button class="ghost" id="ansNo">Не угадали<small>Wrong</small></button>
+      </div>
+    </div>
+  </div>`;
+  const dots = [...body.querySelectorAll('#dots i')];
+  $('#playBtn').onclick = () => {
+    dots.forEach(d => d.classList.remove('on'));
+    const light = i => { if (dots[i]) dots[i].classList.add('on'); floatNote(); };
+    const done = () => { c.plays = (c.plays || 0) + 1; save(); $('#ansBox').classList.remove('hide'); $('#playBtn').innerHTML = `${PLAY_ICON} Ещё раз<small>Play again</small>`; };
+    if (m.own) playOwn(m, n, light, done); else playMelody(m, n, light, done);
+    say('Тсс… слушаем!', 'Shh… listen!', 1500);
+  };
+  $('#ansYes').onclick = () => { stopMelody(); c.result = { team: c.leader, ok: true }; c.stage = 'reveal'; save(); renderMelody(); };
+  $('#ansNo').onclick = () => { stopMelody(); sad(); c.stage = 'steal'; save(); renderMelody(); };
+}
+
+function renderSteal(body, m) {
+  const S = melState(), c = S.cur;
+  body.innerHTML = `
+  <div class="qcard paper">
+    ${metaLine(m)}
+    <h2>Кто знает?<span class="en">Anyone else?</span></h2>
+    <div class="bidlead">Мимо! Другие команды могут ответить — кто первый правильно?<span class="en">Missed! Other teams may answer — who gets it first?</span></div>
+    <div class="bidteams">${state.teams.map((t, i) => i === c.leader ? '' :
+      `<button class="bidbtn" data-i="${i}" style="--c:${t.color}"><span class="d ball">${ini(t)}</span><b>${esc(t.name)}</b><span>угадали · got it</span></button>`).join('')}</div>
+    <div class="center" style="margin-top:18px"><button class="ghost" id="nobody">Никто не угадал<small>Nobody knew</small></button></div>
+  </div>`;
+  body.querySelectorAll('.bidbtn').forEach(b => b.onclick = () => { c.result = { team: +b.dataset.i, ok: true, steal: true }; c.stage = 'reveal'; save(); renderMelody(); });
+  $('#nobody').onclick = () => { c.result = { team: null, ok: false }; c.stage = 'reveal'; save(); renderMelody(); };
+  setTimeout(() => say('Ну же, кто знает?', 'Come on, who knows?'), 300);
+}
+
+function renderMelReveal(body, m) {
+  const S = melState(), c = S.cur, r = c.result || {};
+  let won = null;
+  if (!c.awarded && r.team !== null && r.team !== undefined) { won = giveCandies(r.team, m.d); c.awarded = true; }
+  S.played[m.id] = true; save();
+  renderScores($('#melScores'), [], won ? { [r.team]: won.length } : {});
+  const t = r.team !== null && r.team !== undefined ? state.teams[r.team] : null;
+  body.innerHTML = `
+  <div class="qcard paper" style="text-align:center">
+    ${metaLine(m)}
+    <div class="mtitle" id="melTitle">${esc(m.ru)}</div>
+    <div class="qen">${esc(m.en)}</div>
+    <div class="minfo">${esc(m.info[0])} · <i>${esc(m.info[1])}</i></div>
+    <div class="verdict">${t ? (r.steal ? `Перехватили! «${esc(t.name)}» — ${m.d} ${plural(m.d, 'конфета', 'конфеты', 'конфет')}` : `Браво, «${esc(t.name)}»! ${m.d} ${plural(m.d, 'конфета', 'конфеты', 'конфет')}`)
+      : 'Эту мелодию не угадал никто'}<span class="en">${t ? `${esc(t.name)} win ${m.d} ${m.d === 1 ? 'candy' : 'candies'}` : 'Nobody guessed this one'}</span></div>
+    <div class="center" style="margin-top:20px">
+      <button class="ghost" id="playFull">${PLAY_ICON} Послушать целиком<small>Play it all</small></button>
+      <button class="btn gold" id="toBoard">К табло →<small>Back to the board</small></button>
+    </div>
+  </div>`;
+  $('#playFull').onclick = () => m.own ? playOwn(m, 25, floatNote) : playMelody(m, 0, floatNote);
+  $('#toBoard').onclick = () => { stopMelody(); S.cur = null; save(); renderMelody(); };
+  setTimeout(() => m.own ? playOwn(m, 12, floatNote) : playMelody(m, 0, floatNote), 500);
+  if (won) { setTimeout(() => { flyCandies($('#melTitle'), r.team, won, 0, '#melScores'); fanfare(); confetti(120); hop(); announceTrays(2600); }, 300); say('Правильно!', 'Correct!'); }
+  else if (!t) { sad(); say('Ничего, следующая будет проще!', 'Never mind, the next one will be easier!'); }
+}
+
+// little ♪ floating up from the goat while music plays
+function floatNote() {
+  const r = svg.getBoundingClientRect(); if (!r.width) return;
+  const n = document.createElement('div'); n.className = 'flying mnotefly'; n.textContent = Math.random() < .5 ? '♪' : '♫';
+  document.body.appendChild(n);
+  const x = r.left + r.width * (.55 + Math.random() * .3), y = r.top + r.height * .25;
+  n.animate([{ transform: `translate(${x}px,${y}px)`, opacity: 0 }, { transform: `translate(${x + 20}px,${y - 40}px)`, opacity: 1, offset: .3 },
+    { transform: `translate(${x - 10}px,${y - 110}px)`, opacity: 0 }], { duration: 1600, easing: 'ease-out' }).onfinish = () => n.remove();
+}
+
+/* ---------- add your own song ---------- */
+function openAddOwn() {
+  const dlg = document.createElement('div'); dlg.className = 'modal';
+  dlg.innerHTML = `<div class="qcard paper mform">
+    <h2>Своя песня<span class="en">Add your own song</span></h2>
+    <label>Аудиофайл (mp3, m4a…) · Audio file<input type="file" id="ofile" accept="audio/*"></label>
+    <label>Название по-русски · Title in Russian<input type="text" id="oru" placeholder="Например: Песенка о медведях"></label>
+    <label>Название по-английски · Title in English<input type="text" id="oen" placeholder="e.g. Song about the bears"></label>
+    <label>Начать с секунды · Start at second<input type="number" id="ostart" value="0" min="0"></label>
+    <div class="label" style="margin:8px 0">Сложность · Difficulty</div>
+    <div class="center"><div class="seg" id="odiff"><button data-d="1">Легко</button><button data-d="2" class="on">Средне</button><button data-d="3">Сложно</button></div></div>
+    <div class="qactions" style="margin-top:22px"><button class="ghost" id="ocancel">Отмена<small>Cancel</small></button><button class="btn gold" id="osave">Добавить<small>Add</small></button></div>
+  </div>`;
+  document.body.appendChild(dlg);
+  let d = 2;
+  dlg.querySelector('#odiff').onclick = e => { const b = e.target.closest('button'); if (!b) return; d = +b.dataset.d; dlg.querySelectorAll('#odiff button').forEach(x => x.classList.toggle('on', x === b)); };
+  dlg.querySelector('#ocancel').onclick = () => dlg.remove();
+  dlg.querySelector('#osave').onclick = async () => {
+    const f = dlg.querySelector('#ofile').files[0], ru = dlg.querySelector('#oru').value.trim();
+    if (!f || !ru) { say('Нужен файл и название', 'Need a file and a title'); return; }
+    const id = 'own' + Date.now();
+    try { await idbDo('readwrite', st => st.put(f, id)); }
+    catch (e) { say('Браузер не дал сохранить файл', 'The browser refused to store the file'); return; }
+    ownList().push({ id, ru, en: dlg.querySelector('#oen').value.trim() || ru, d, start: +dlg.querySelector('#ostart').value || 0 });
+    save(); dlg.remove(); bell(1318, 0, .4, .1); renderMelody();
+  };
+}
+
+/* =====================================================================
+   «ВИКТОРИНА» — categories × difficulty, 4 options, RU/EN
+   ===================================================================== */
+const QZ_CATS = [
+  { id: 'film', ru: 'Советские фильмы', en: 'Soviet films' },
+  { id: 'ny', ru: 'Про Новый год', en: 'All about New Year' },
+  { id: 'world', ru: 'Новый год по миру', en: 'New Year around the world' },
+  { id: 'itgr', ru: 'Италия и Греция', en: 'Italy & Greece' },
+  { id: 'table', ru: 'Новогодний стол', en: 'The festive table' },
+];
+// a = index of the correct option; options are [ru, en]
+const QZ = [
+  { id: 'f1', c: 'film', d: 1, ru: 'В какой город по ошибке улетает Женя Лукашин в «Иронии судьбы»?', en: 'In “The Irony of Fate”, which city does Zhenya fly to by mistake?',
+    o: [['Ленинград', 'Leningrad'], ['Киев', 'Kyiv'], ['Рига', 'Riga'], ['Минск', 'Minsk']], a: 0,
+    f: ['После бани с друзьями его по ошибке сажают в самолёт вместо приятеля.', 'After the bathhouse his drunk friends put him on the plane instead of their pal.'] },
+  { id: 'f2', c: 'film', d: 1, ru: 'Из какого фильма фраза «Какая гадость эта ваша заливная рыба!»?', en: 'Which film gave us the line “What a disgusting thing, your jellied fish!”?',
+    o: [['«Ирония судьбы»', 'The Irony of Fate'], ['«Бриллиантовая рука»', 'The Diamond Arm'], ['«Служебный роман»', 'Office Romance'], ['«Джентльмены удачи»', 'Gentlemen of Fortune']], a: 0,
+    f: ['Так говорит Ипполит, жених Нади, — а заливную рыбу на Новый год готовят до сих пор.', 'Ippolit, Nadya’s fiancé, says it — and jellied fish is still a New Year dish.'] },
+  { id: 'f3', c: 'film', d: 2, ru: 'Кто в «Карнавальной ночи» пытается сделать праздник скучным и «серьёзным»?', en: 'In “Carnival Night”, who tries to make the party boring and “serious”?',
+    o: [['Товарищ Огурцов', 'Comrade Ogurtsov'], ['Товарищ Бывалов', 'Comrade Byvalov'], ['Новосельцев', 'Novoseltsev'], ['Шурик', 'Shurik']], a: 0,
+    f: ['Огурцова сыграл Игорь Ильинский, а праздник всё равно спасла молодёжь во главе с Леной Крыловой — Людмилой Гурченко.', 'Ogurtsov was played by Igor Ilyinsky; young Lena (Lyudmila Gurchenko) saves the party anyway.'] },
+  { id: 'f4', c: 'film', d: 2, ru: 'В кого злой колдун превращает Ивана в сказке «Морозко»?', en: 'In the fairy-tale film “Jack Frost” (Morozko), what is Ivan turned into?',
+    o: [['В медведя — точнее, ему дают медвежью голову', 'A bear — he gets a bear’s head'], ['В лягушку', 'A frog'], ['В козла', 'A goat'], ['В снеговика', 'A snowman']], a: 0,
+    f: ['Старичок-боровичок наказывает Ивана за гордость, и тот ходит с медвежьей головой, пока не исправится.', 'The mushroom-elder punishes Ivan’s pride; he wears a bear’s head until he becomes kind.'] },
+  { id: 'f5', c: 'film', d: 3, ru: 'На какой улице живут и Женя, и Надя в «Иронии судьбы»?', en: 'In “The Irony of Fate”, what street do both Zhenya and Nadya live on?',
+    o: [['3-я улица Строителей', '3rd Builders Street'], ['Ленинский проспект', 'Leninsky Prospekt'], ['Улица Мира', 'Peace Street'], ['1-я Парковая', '1st Park Street']], a: 0,
+    f: ['Дом 25, квартира 12 — и в Москве, и в Ленинграде одинаковые дома и даже одинаковые ключи!', 'House 25, flat 12 — in Moscow and Leningrad: identical buildings and even identical keys!'] },
+  { id: 'f6', c: 'film', d: 3, ru: 'Как называется волшебный институт в новогоднем фильме «Чародеи»?', en: 'What is the magic institute called in the New Year film “The Magicians” (Charodei)?',
+    o: [['НУИНУ', 'NUINU'], ['НИИЧАВО', 'NIICHAVO'], ['ЦНИИ МАГ', 'TsNII MAG'], ['ГИПРОМАГ', 'GIPROMAG']], a: 0,
+    f: ['«Научный универсальный институт необыкновенных услуг». А НИИЧАВО — из книги Стругацких, по мотивам которой снят фильм.', 'The “Scientific Universal Institute of Extraordinary Services”. NIICHAVO is from the Strugatsky book that inspired it.'] },
+
+  { id: 'n1', c: 'ny', d: 1, ru: 'Как зовут внучку Деда Мороза?', en: 'What is the name of Ded Moroz’s granddaughter?',
+    o: [['Снегурочка', 'Snegurochka (Snow Maiden)'], ['Метелица', 'Metelitsa'], ['Василиса', 'Vasilisa'], ['Алёнушка', 'Alyonushka']], a: 0,
+    f: ['Снегурочка — помощница Деда Мороза, её нет ни в одной другой стране.', 'The Snow Maiden is Ded Moroz’s helper — a character found only in Russian tradition.'] },
+  { id: 'n2', c: 'ny', d: 1, ru: 'Под бой каких часов в России встречают Новый год?', en: 'Which clock chimes in the New Year in Russia?',
+    o: [['Кремлёвских курантов', 'The Kremlin Chimes'], ['Биг-Бена', 'Big Ben'], ['Часов на Исаакиевском соборе', 'St Isaac’s Cathedral clock'], ['Часов на Казанском вокзале', 'Kazansky Station clock']], a: 0,
+    f: ['Куранты на Спасской башне Кремля бьют 12 раз — под них загадывают желание.', 'The clock on the Kremlin’s Spasskaya Tower strikes 12 — time to make a wish.'] },
+  { id: 'n3', c: 'ny', d: 2, ru: 'Какой праздник отмечают в ночь с 13 на 14 января?', en: 'What holiday is celebrated on the night of January 13–14?',
+    o: [['Старый Новый год', 'Old New Year'], ['Крещение', 'Epiphany'], ['Рождество', 'Christmas'], ['Масленицу', 'Maslenitsa']], a: 0,
+    f: ['Это Новый год по старому, юлианскому календарю — ещё один повод собраться за столом.', 'It’s New Year by the old Julian calendar — one more excuse for a feast.'] },
+  { id: 'n4', c: 'ny', d: 2, ru: 'Какое животное — символ 2027 года по восточному календарю?', en: 'Which animal is the symbol of 2027 in the Chinese zodiac?',
+    o: [['Коза', 'The Goat'], ['Лошадь', 'The Horse'], ['Тигр', 'The Tiger'], ['Дракон', 'The Dragon']], a: 0,
+    f: ['Именно поэтому наша ведущая — козочка!', 'That’s exactly why our host is a goat!'] },
+  { id: 'n5', c: 'ny', d: 3, ru: 'Чья статья в газете «Правда» в 1935 году вернула в СССР новогоднюю ёлку?', en: 'Whose 1935 article in “Pravda” brought the New Year tree back to the USSR?',
+    o: [['Павла Постышева', 'Pavel Postyshev'], ['Максима Горького', 'Maxim Gorky'], ['Анатолия Луначарского', 'Anatoly Lunacharsky'], ['Сергея Кирова', 'Sergei Kirov']], a: 0,
+    f: ['До этого ёлку считали «поповским обычаем», а после статьи она стала новогодней — со звездой вместо Вифлеемской.', 'Before that the tree was frowned upon as religious; afterwards it became a New Year tree, with a red star on top.'] },
+  { id: 'n6', c: 'ny', d: 3, ru: 'С какого года 1 января в СССР снова стало выходным днём?', en: 'From what year was January 1st a day off again in the USSR?',
+    o: [['1947', '1947'], ['1935', '1935'], ['1961', '1961'], ['1918', '1918']], a: 0,
+    f: ['С конца 1920-х 1 января было рабочим днём, и только с 1947 года праздник снова стал выходным.', 'From the late 1920s it was a working day; only from 1947 was it a holiday again.'] },
+
+  { id: 'w1', c: 'world', d: 1, ru: 'Как называется Новый год в Шотландии?', en: 'What is New Year’s Eve called in Scotland?',
+    o: [['Хогманай', 'Hogmanay'], ['Самайн', 'Samhain'], ['Йоль', 'Yule'], ['Белтейн', 'Beltane']], a: 0,
+    f: ['На Хогманай поют «Auld Lang Syne», взявшись за руки крест-накрест.', 'At Hogmanay people sing “Auld Lang Syne”, arms crossed and hands joined.'] },
+  { id: 'w2', c: 'world', d: 1, ru: 'Что бьют о двери друзей в Дании в новогоднюю ночь — на счастье?', en: 'What do Danes smash against their friends’ doors on New Year’s Eve for luck?',
+    o: [['Старые тарелки', 'Old plates'], ['Сосульки', 'Icicles'], ['Яйца', 'Eggs'], ['Бутылки', 'Bottles']], a: 0,
+    f: ['Чем больше осколков у двери утром — тем больше у вас друзей!', 'The bigger the pile of shards by your door, the more friends you have!'] },
+  { id: 'w3', c: 'world', d: 2, ru: 'Через сколько волн прыгают на пляже в Бразилии в новогоднюю ночь?', en: 'How many waves do Brazilians jump over on the beach at New Year?',
+    o: [['7', '7'], ['3', '3'], ['12', '12'], ['21', '21']], a: 0,
+    f: ['На каждую волну загадывают желание и одеваются во всё белое.', 'One wish per wave — and everyone dresses in white.'] },
+  { id: 'w4', c: 'world', d: 2, ru: 'Какие пончики жарят на Новый год в Нидерландах?', en: 'Which doughnuts do the Dutch fry for New Year?',
+    o: [['Олиболлен', 'Oliebollen'], ['Пончики-берлинеры', 'Berliners'], ['Чуррос', 'Churros'], ['Бейглы', 'Bagels']], a: 0,
+    f: ['«Масляные шарики» с изюмом, посыпанные сахарной пудрой.', '“Oil balls” with raisins, dusted with powdered sugar.'] },
+  { id: 'w5', c: 'world', d: 3, ru: 'Кто, по шотландской примете, должен первым войти в дом в новом году, чтобы принести удачу?', en: 'In Scotland, who should be the first to enter your home in the New Year to bring luck?',
+    o: [['Высокий темноволосый мужчина', 'A tall dark-haired man'], ['Рыжеволосая женщина', 'A red-haired woman'], ['Ребёнок', 'A child'], ['Почтальон', 'The postman']], a: 0,
+    f: ['Этот обычай называется «first-foot», и гость приносит угощение — например, уголь, соль или виски.', 'It’s called “first-footing”; the guest brings gifts like coal, salt or whisky.'] },
+  { id: 'w6', c: 'world', d: 3, ru: 'В какой стране в новогоднюю ночь звонят в колокола храмов 108 раз?', en: 'In which country do temple bells ring 108 times on New Year’s Eve?',
+    o: [['Япония', 'Japan'], ['Китай', 'China'], ['Таиланд', 'Thailand'], ['Индия', 'India']], a: 0,
+    f: ['Обряд «Дзёя-но канэ»: каждый удар прогоняет одну из 108 земных страстей.', 'The “Joya no Kane” ritual: each strike chases away one of 108 earthly desires.'] },
+
+  { id: 'g1', c: 'itgr', d: 1, ru: 'Бельё какого цвета на удачу надевают итальянцы в новогоднюю ночь?', en: 'What colour underwear do Italians wear on New Year’s Eve for luck?',
+    o: [['Красного', 'Red'], ['Белого', 'White'], ['Золотого', 'Gold'], ['Зелёного', 'Green']], a: 0,
+    f: ['Красный цвет — на любовь и удачу. А утром бельё по традиции выбрасывают!', 'Red is for love and luck — and by tradition it’s thrown away the next morning!'] },
+  { id: 'g2', c: 'itgr', d: 1, ru: 'Что прячут в греческий новогодний пирог «Василопита»?', en: 'What is hidden inside the Greek New Year cake, Vasilopita?',
+    o: [['Монетку', 'A coin'], ['Изюминку', 'A raisin'], ['Колечко', 'A ring'], ['Записку', 'A note']], a: 0,
+    f: ['Пирог режет глава семьи, и кому достанется монетка — тому весь год везёт.', 'The head of the family cuts it; whoever gets the coin is lucky all year.'] },
+  { id: 'g3', c: 'itgr', d: 2, ru: 'Что едят итальянцы в новогоднюю ночь, чтобы разбогатеть?', en: 'What do Italians eat on New Year’s Eve to become rich?',
+    o: [['Чечевицу', 'Lentils'], ['Рис', 'Rice'], ['Фасоль', 'Beans'], ['Горох', 'Peas']], a: 0,
+    f: ['Чечевица похожа на монетки. Её подают с колбасой котекино или свиной ножкой дзампоне.', 'Lentils look like little coins; they’re served with cotechino or zampone sausage.'] },
+  { id: 'g4', c: 'itgr', d: 2, ru: 'Какой фрукт греки разбивают о порог дома на Новый год?', en: 'Which fruit do Greeks smash on their doorstep at New Year?',
+    o: [['Гранат', 'A pomegranate'], ['Апельсин', 'An orange'], ['Арбуз', 'A watermelon'], ['Лимон', 'A lemon']], a: 0,
+    f: ['Чем больше зёрнышек разлетится — тем больше счастья и достатка будет в году.', 'The more seeds scatter, the more luck and plenty the year will bring.'] },
+  { id: 'g5', c: 'itgr', d: 3, ru: 'Что греки вешают над дверью на Новый год как символ жизни и обновления?', en: 'What do Greeks hang over the door at New Year as a symbol of life and renewal?',
+    o: [['Луковицу морского лука', 'A sea squill bulb (a big onion)'], ['Подкову', 'A horseshoe'], ['Чеснок', 'Garlic'], ['Ветку оливы', 'An olive branch']], a: 0,
+    f: ['Морской лук пускает ростки даже без земли — поэтому он символ жизненной силы.', 'Sea squill sprouts even without soil — so it stands for the strength of life.'] },
+  { id: 'g6', c: 'itgr', d: 3, ru: 'Что по старой традиции жители Неаполя выбрасывали из окон в новогоднюю ночь?', en: 'By old tradition, what did people in Naples throw out of their windows on New Year’s Eve?',
+    o: [['Старые вещи', 'Old things'], ['Конфетти', 'Confetti'], ['Цветы', 'Flowers'], ['Монетки', 'Coins']], a: 0,
+    f: ['Так прощались со всем плохим из старого года. Сейчас обычай почти забыт — уж очень было опасно для прохожих!', 'A way to get rid of the old year’s troubles. It’s mostly gone now — too dangerous for passers-by!'] },
+
+  { id: 't1', c: 'table', d: 1, ru: 'Как называется главный новогодний салат с колбасой, горошком и майонезом?', en: 'What is the main New Year salad with sausage, peas and mayonnaise called?',
+    o: [['Оливье', 'Olivier'], ['Мимоза', 'Mimosa'], ['Винегрет', 'Vinegret'], ['Цезарь', 'Caesar']], a: 0,
+    f: ['За границей его часто называют просто «русским салатом».', 'Abroad it’s often simply called “Russian salad”.'] },
+  { id: 't2', c: 'table', d: 1, ru: 'Селёдка под… чем?', en: 'Herring under a… what? (a layered beetroot salad)',
+    o: [['Шубой', 'Fur coat'], ['Шапкой', 'Hat'], ['Одеялом', 'Blanket'], ['Снегом', 'Snow']], a: 0,
+    f: ['Свёкла сверху и правда похожа на тёплую шубу.', 'The beetroot layer on top really does look like a warm fur coat.'] },
+  { id: 't3', c: 'table', d: 2, ru: 'Какой фрукт был главным запахом Нового года в СССР?', en: 'Which fruit was the main smell of New Year in the USSR?',
+    o: [['Мандарины', 'Tangerines'], ['Апельсины', 'Oranges'], ['Ананасы', 'Pineapples'], ['Яблоки', 'Apples']], a: 0,
+    f: ['Их привозили из Абхазии и Марокко, и за ними выстраивались очереди.', 'They came from Abkhazia and Morocco — and people queued for them.'] },
+  { id: 't4', c: 'table', d: 2, ru: 'Как зовут медведя на фантике знаменитых конфет с белым медведем?', en: 'What are the famous candies with a polar bear on the wrapper called?',
+    o: [['«Мишка на Севере»', 'Bear in the North'], ['«Мишка косолапый»', 'Clumsy Bear'], ['«Умка»', 'Umka'], ['«Белый мишка»', 'White Bear']], a: 0,
+    f: ['Их выпускает фабрика имени Бабаева — посмотрите на подносы, они там тоже есть!', 'Made by the Babaev factory — look at your trays, you may have some!'] },
+  { id: 't5', c: 'table', d: 3, ru: 'Кто придумал салат «Оливье»?', en: 'Who invented the Olivier salad?',
+    o: [['Повар-француз Люсьен Оливье', 'French chef Lucien Olivier'], ['Огюст Эскофье', 'Auguste Escoffier'], ['Мари-Антуан Карем', 'Marie-Antoine Carême'], ['Повар Николая II', 'Nicholas II’s cook']], a: 0,
+    f: ['В 1860-х он подавал его в московском ресторане «Эрмитаж» — и рецепт держал в секрете.', 'He served it in the 1860s at the Hermitage restaurant in Moscow and kept the recipe secret.'] },
+  { id: 't6', c: 'table', d: 3, ru: 'В каком веке появился салат «Оливье»?', en: 'In which century did the Olivier salad appear?',
+    o: [['В XIX', '19th'], ['В XVIII', '18th'], ['В XX', '20th'], ['В XVII', '17th']], a: 0,
+    f: ['Изначально в нём были рябчики, раковые шейки и каперсы — совсем не как у бабушки!', 'The original had hazel grouse, crayfish tails and capers — nothing like grandma’s!'] },
+];
+
+/* ---------- state ---------- */
+const qzState = () => (state.quiz = state.quiz || { played: {}, turn: 0, cur: null });
+const qzById = id => QZ.find(q => q.id === id);
+const LETTERS = ['А', 'Б', 'В', 'Г'];
+// stable shuffle of options per question, so the right answer isn't always first
+function qzOrder(q) {
+  let h = 2166136261; for (const ch of q.id + 'kozochka') { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619) >>> 0; }
+  const rest = [1, 2, 3], out = [];
+  for (let i = 3; i > 0; i--) { h = Math.imul(h ^ (h >>> 13), 1274126177) >>> 0; const j = h % (i); out.push(rest.splice(j, 1)[0]); }
+  h = Math.imul(h ^ (h >>> 15), 2246822519) >>> 0;
+  out.splice(h % 4, 0, 0); return out;
+}
+
+function renderQuiz() {
+  renderScores($('#qzScores'));
+  const S = qzState(), body = $('#qzBody');
+  if (!S.cur) return renderQzBoard(body);
+  const q = qzById(S.cur.id);
+  if (S.cur.stage === 'reveal') return renderQzReveal(body, q);
+  renderQzAsk(body, q);
+}
+
+function renderQzBoard(body) {
+  const S = qzState();
+  if (S.turn >= state.teams.length) S.turn = 0;
+  const t = state.teams[S.turn];
+  body.innerHTML = `
+  <div class="qcard paper">
+    <h2>Викторина<span class="en">Quiz</span></h2>
+    <p class="mrules">Команды по очереди выбирают тему и сложность. Правильный ответ — конфеты на поднос: 1, 2 или 3. Ошиблись — другая команда может перехватить!
+      <span class="en">Teams take turns picking a topic and difficulty. A right answer earns 1, 2 or 3 candies. Wrong? Another team can steal!</span></p>
+    <div class="turn" style="--c:${t.color}"><span class="d ball">${ini(t)}</span>Выбирает команда «${esc(t.name)}»<span class="en">${esc(t.name)}, your pick</span></div>
+    <div class="board qzboard">${QZ_CATS.map(c => `<div class="mcol"><div class="mhead">${esc(c.ru)}<span class="en">${esc(c.en)}</span></div>
+      ${QZ.filter(q => q.c === c.id).sort((a, b) => a.d - b.d).map((q, k) => {
+        const p = S.played[q.id];
+        return `<button class="mcard d${q.d} ${p ? 'played' : ''}" data-id="${q.id}">
+          <span class="mnum">${p ? (p === 'x' ? 'Не угадали' : esc(state.teams[p - 1] ? state.teams[p - 1].name : '')) : 'Вопрос ' + (k + 1)}</span>
+          <span class="mdiff">${DIFF[q.d].ru} · ${DIFF[q.d].en}</span><span class="mprize">${prizeIcons(q.d)}</span></button>`; }).join('')}
+      </div>`).join('')}</div>
+    <div class="center" style="margin-top:18px"><button class="ghost" id="qzReset">Начать табло заново<small>Reset board</small></button></div>
+  </div>`;
+  body.querySelectorAll('.mcard[data-id]').forEach(b => b.onclick = () => {
+    if (S.played[b.dataset.id]) { say('Этот вопрос уже был', 'Already asked'); return; }
+    S.cur = { id: b.dataset.id, team: S.turn, wrong: [], tried: [S.turn], stage: 'ask' }; save(); hop(); bell(1046, 0, .4, .1); renderQuiz();
+  });
+  $('#qzReset').onclick = () => { S.played = {}; S.cur = null; S.turn = 0; save(); renderQuiz(); };
+  setTimeout(() => say(`${t.name}, выбирайте!`, `${t.name}, pick a question!`), 300);
+}
+
+function renderQzAsk(body, q) {
+  const S = qzState(), c = S.cur, t = state.teams[c.team], cat = QZ_CATS.find(x => x.id === q.c);
+  const steal = c.wrong.length > 0;
+  body.innerHTML = `
+  <div class="qcard paper">
+    <div class="qmeta"><span>${esc(cat.ru)} · ${DIFF[q.d].ru}</span><span class="mprize">приз · prize ${prizeIcons(q.d)}</span></div>
+    <div class="progress"><i style="width:100%"></i></div>
+    <div class="qru">${esc(q.ru)}</div>
+    <div class="qen">${esc(q.en)}</div>
+    <div class="turn small" style="--c:${t.color}"><span class="d ball">${ini(t)}</span>${steal ? 'Перехват! Отвечает' : 'Отвечает'} «${esc(t.name)}»
+      <span class="en">${steal ? 'Steal! ' : ''}${esc(t.name)} answers</span></div>
+    <div class="opts">${qzOrder(q).map((i, k) => `<button class="qopt ${c.wrong.includes(i) ? 'bad' : ''}" data-i="${i}" ${c.wrong.includes(i) ? 'disabled' : ''}>
+      <b>${LETTERS[k]}</b><span>${esc(q.o[i][0])}<i>${esc(q.o[i][1])}</i></span></button>`).join('')}</div>
+    <div class="qactions"><span class="mnote">Нажмите на вариант, который назвала команда<span class="en">Tap the option the team chose</span></span>
+      <button class="ghost" id="qzSkip">Показать ответ<small>Show answer</small></button></div>
+  </div>`;
+  lookAt = $('.qru');
+  body.querySelectorAll('.qopt').forEach(b => b.onclick = () => {
+    const i = +b.dataset.i;
+    if (i === q.a) { c.result = { team: c.team, steal }; c.stage = 'reveal'; save(); renderQuiz(); return; }
+    c.wrong.push(i); b.classList.add('bad', 'shake'); sad(); bell(220, 0, .5, .12);
+    const others = state.teams.map((_, k) => k).filter(k => !c.tried.includes(k));
+    if (!others.length || c.wrong.length >= 3) { setTimeout(() => { c.result = { team: null }; c.stage = 'reveal'; save(); renderQuiz(); }, 700); return; }
+    save(); setTimeout(() => showSteal(body, others), 600);
+  });
+  $('#qzSkip').onclick = () => { c.result = { team: null }; c.stage = 'reveal'; save(); renderQuiz(); };
+  if (!steal) setTimeout(() => say('Думайте! Варианта четыре — верный один.', 'Think! Four options, one is right.'), 300);
+}
+
+function showSteal(body, others) {
+  const S = qzState(), c = S.cur;
+  const m = document.createElement('div'); m.className = 'modal';
+  m.innerHTML = `<div class="qcard paper" style="max-width:560px;text-align:center">
+    <h2 style="text-align:center">Мимо!<span class="en">Wrong!</span></h2>
+    <div class="bidlead">Кто перехватит вопрос?<span class="en">Who wants to steal?</span></div>
+    <div class="bidteams">${others.map(k => { const t = state.teams[k];
+      return `<button class="bidbtn" data-k="${k}" style="--c:${t.color}"><span class="d ball">${ini(t)}</span><b>${esc(t.name)}</b><span>перехват · steal</span></button>`; }).join('')}</div>
+    <div class="center" style="margin-top:16px"><button class="ghost" id="noSteal">Никто — покажите ответ<small>Nobody — show the answer</small></button></div></div>`;
+  document.body.appendChild(m);
+  say('Мимо! Кто перехватит?', 'Missed! Who steals?');
+  m.querySelectorAll('.bidbtn').forEach(b => b.onclick = () => { const k = +b.dataset.k; c.team = k; c.tried.push(k); save(); m.remove(); renderQuiz(); });
+  m.querySelector('#noSteal').onclick = () => { m.remove(); c.result = { team: null }; c.stage = 'reveal'; save(); renderQuiz(); };
+}
+
+function renderQzReveal(body, q) {
+  const S = qzState(), c = S.cur, r = c.result || {};
+  let won = null;
+  if (!c.awarded) {
+    if (r.team !== null && r.team !== undefined) won = giveCandies(r.team, q.d);
+    c.awarded = true; S.played[q.id] = r.team !== null && r.team !== undefined ? r.team + 1 : 'x';
+    S.turn = (S.turn + 1) % state.teams.length; save();
+  }
+  renderScores($('#qzScores'), [], won ? { [r.team]: won.length } : {});
+  const t = r.team !== null && r.team !== undefined ? state.teams[r.team] : null;
+  const cand = n => `${n} ${plural(n, 'конфета', 'конфеты', 'конфет')}`;
+  body.innerHTML = `
+  <div class="qcard paper">
+    <div class="qmeta"><span>${esc(QZ_CATS.find(x => x.id === q.c).ru)} · ${DIFF[q.d].ru}</span><span class="mprize">приз · prize ${prizeIcons(q.d)}</span></div>
+    <div class="progress"><i style="width:100%"></i></div>
+    <div class="qen" style="margin-top:0">${esc(q.ru)}<br>${esc(q.en)}</div>
+    <div class="opts">${qzOrder(q).map((i, k) => `<div class="qopt ${i === q.a ? 'good' : c.wrong.includes(i) ? 'bad' : 'dim'}" ${i === q.a ? 'id="qzRight"' : ''}>
+      <b>${LETTERS[k]}</b><span>${esc(q.o[i][0])}<i>${esc(q.o[i][1])}</i></span></div>`).join('')}</div>
+    <div class="verdict">${t ? (r.steal ? `Перехват удался! «${esc(t.name)}» — ${cand(q.d)}` : `Верно! «${esc(t.name)}» — ${cand(q.d)}`) : 'Правильный ответ выделен'}
+      <span class="en">${t ? `${esc(t.name)} win ${q.d} ${q.d === 1 ? 'candy' : 'candies'}` : 'The right answer is highlighted'}</span></div>
+    <div class="fact">${esc(q.f[0])}<span class="en">${esc(q.f[1])}</span></div>
+    <div class="center" style="margin-top:18px"><button class="btn gold" id="qzBack">К табло →<small>Back to the board</small></button></div>
+  </div>`;
+  $('#qzBack').onclick = () => { S.cur = null; save(); renderQuiz(); };
+  if (won) { setTimeout(() => { flyCandies($('#qzRight'), r.team, won, 0, '#qzScores'); fanfare(); confetti(110); hop(); announceTrays(2600); }, 250); say('Правильно!', 'Correct!'); }
+  else if (!t) { sad(); say('Ничего, в следующий раз!', 'Never mind, next time!'); }
 }
 
 /* ---------- countdown to New Year ---------- */
